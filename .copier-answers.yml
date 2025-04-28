@@ -1,0 +1,29 @@
+# Changes here will be overwritten by Copier
+SelectCodeQualityFeatures:
+- AddLocalTests_flag
+- SelectGitHubActions_flag
+- AddLinting_flag
+- AddPreCommit_flag
+- AddEditorConfig_flag
+SelectCommunityFeatures: []
+SelectDatabasesFeatures: []
+SelectDocumentationFeatures:
+- AddLocalDocumentation_flag
+- AddOnlineDocumentation_flag
+- AddGitHubActionDocumentation_flag
+SelectGitHubActions:
+- AddGitHubActionBuild_flag
+SelectPublishReleaseFeatures: []
+_commit: 260b245
+_src_path: /home/wschuell/Boulot_Projets/Templates/copier_templates/python-template
+copyright_holder: Huanni Zhang
+email: huanni.zhang@univie.ac.at
+full_name: Huanni Zhang
+github_organization: molinfo-vienna
+keywords: chemoinformatics,scientific software,chemistry,drug discovery,toxicity
+license: MIT
+package_name: trialblazer
+package_short_description: A Chemistry-Focused Predictor of Toxicity Risks in Late-Stage
+    Drug Development
+template_profile: ask
+version: 0.1.0
