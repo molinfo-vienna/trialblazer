@@ -105,12 +105,12 @@ active_preprocessed_target_unique_smiles = pd.read_csv(
 )
 active_preprocessed_target_unique_smiles["target_id"] = (
     active_preprocessed_target_unique_smiles["target_id"].apply(
-        ast.literal_eval
+        ast.literal_eval,
     )
 )
 inactive_preprocessed_target_unique_smiles["target_id"] = (
     inactive_preprocessed_target_unique_smiles["target_id"].apply(
-        ast.literal_eval
+        ast.literal_eval,
     )
 )
 
