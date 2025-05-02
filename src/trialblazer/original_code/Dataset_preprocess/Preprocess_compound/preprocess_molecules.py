@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from . import MoleculePreprocessorExtended
+from acm_hamburg_legacy import MoleculePreprocessorExtended
 from rdkit import RDLogger
 
 
