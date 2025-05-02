@@ -9,7 +9,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 authors = [
-    { name = "Huanni Zhang", email = "huanni.zhang@univie.ac.at" }
+    { name = "Huanni Zhang", email = "huanni.zhang@univie.ac.at" },
+    { name = "William Schueller", email = "william.schueller@univie.ac.at" }
 ]
 classifiers = [
     "Development Status :: 2 - Pre-Alpha",
