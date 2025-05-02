@@ -33,6 +33,9 @@ dependencies = [
 "psutil",
 "joblib",
 "pyzmq",
+"git+https://github.com/molinfo-vienna/acm-hamburg-legacy.git",
+"chembl_structure_pipeline",
+"fpsim2",
 ]
 description = "A Chemistry-Focused Predictor of Toxicity Risks in Late-Stage Drug Development"
 keywords = ["chemoinformatics","scientific software","chemistry","drug discovery","toxicity"]
