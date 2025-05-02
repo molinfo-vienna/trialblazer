@@ -26,6 +26,13 @@ classifiers = [
 dependencies = [
 "pandas",
 "rdkit",
+"numpy",
+"scikit-learn",
+"seaborn",
+"matplotlib",
+"psutil",
+"joblib",
+"pyzmq",
 ]
 description = "A Chemistry-Focused Predictor of Toxicity Risks in Late-Stage Drug Development"
 keywords = ["chemoinformatics","scientific software","chemistry","drug discovery","toxicity"]
