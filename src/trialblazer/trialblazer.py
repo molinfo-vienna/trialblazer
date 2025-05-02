@@ -1,3 +1,3 @@
-class Trialblazer(object):
+class Trialblazer:
     def run(self):
         pass

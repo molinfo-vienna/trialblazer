@@ -1,12 +1,13 @@
-from trialblazer import Trialblazer
-import pandas as pd
 import os
+import pandas as pd
 
 input_data = pd.read_csv(
-    os.path.join(os.path.dirname(__file__), "data", "test_input.csv"), delimiter="|"
+    os.path.join(os.path.dirname(__file__), "data", "test_input.csv"),
+    delimiter="|",
 )
 output_data = pd.read_csv(
-    os.path.join(os.path.dirname(__file__), "data", "test_output.csv"), delimiter="|"
+    os.path.join(os.path.dirname(__file__), "data", "test_output.csv"),
+    delimiter="|",
 )
 
 
