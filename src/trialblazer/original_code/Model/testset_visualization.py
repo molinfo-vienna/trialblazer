@@ -109,7 +109,7 @@ def SuspectedAdverseDrugEvents_count_for_eachdrug(prediction_combine):
     colors = [mcolors.rgb2hex(color_map(i)) for i in range(num_categories)]
 
     bar_width = 0.8
-    gap_between_drugs = 20
+    gap_between_drugs = 25
 
     x_indexes = np.arange(len(prediction_combine["Drugs"])) * (
         1 + gap_between_drugs
@@ -138,7 +138,7 @@ def SuspectedAdverseDrugEvents_count_for_eachdrug(prediction_combine):
     )
 
     plt.xlabel("Drug", fontsize=10)
-    plt.ylabel("Count", fontsize=10)
+    plt.ylabel("Number of adverse drug reaction reports", fontsize=10)
 
     mid_index = len(prediction_combine["Drugs"]) // 2
     separation_x = (x_indexes[mid_index - 1] + x_indexes[mid_index + 1]) / 2
@@ -162,7 +162,23 @@ def SuspectedAdverseDrugEvents_count_for_eachdrug(prediction_combine):
         ha="left",
         color="#a17db4",
     )
-    plt.legend(title="Severity", loc="upper left", bbox_to_anchor=(1, 1))
+    plt.legend(title='Severity', loc='upper center', bbox_to_anchor=(0.5, -0.25), ncol=5)
+    plt.tight_layout()
+    plt.show()
+
+
+def SuspectedAdverseDrugEvents_Totalcount_for_eachdrug(prediction_combine):
+    x_indexes = np.arange(len(prediction_combine['Drugs']))
+    fig, ax = plt.subplots(figsize=(12, 6))
+    plt.bar(x_indexes, prediction_combine['Total'], color='#B36A6F')
+    mid_index = len(prediction_combine['Drugs']) // 2
+    separation_x = (x_indexes[mid_index - 1] + x_indexes[mid_index]) / 2
+    plt.axvline(x=separation_x, color='navy', linestyle='--', linewidth=2)
+    plt.text(separation_x - 3, plt.ylim()[1] * 0.9, 'Benign', fontsize=10, fontweight='bold',ha='right', color='#8ea5c8')
+    plt.text(separation_x + 3, plt.ylim()[1] * 0.9, 'Toxic', fontsize=10, fontweight='bold',ha='left', color='#a17db4')
+    plt.xticks(ticks=x_indexes, labels=prediction_combine['Drugs'], rotation=45, ha="right",fontsize=8, fontfamily='Arial')
+    plt.xlabel('Drug')
+    plt.ylabel('Total count of adverse reactions')
     plt.tight_layout()
     plt.show()
 
