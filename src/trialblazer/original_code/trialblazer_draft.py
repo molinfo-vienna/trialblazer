@@ -186,18 +186,19 @@ def run():
 
     """Final step, employ the model"""
     # The input of Trialblazer is a dataframe of training featrues and the binary label of each compound, and the test set,
-    # the output is a dataframe with the PrOCTOR socre and prediction results for each compound in test set.
+    # the output including a dataframe with the PrOCTOR socre and prediction results for each compound in test set, and the cloestest similairty between test compounds and training compounds
     M2FPs_PBFPs = morgan_cols + training_target_list
-    X = training_target_features[M2FPs_PBFPs]
     y = training_target_features.Mark
     test_set = testset_filtered_targets
-    result_with_score = Trialblazer(
-        X, y, test_set, threshold=0.06264154114736771, k=900, unsure_if_toxic=False
-    )
-    # if the user sure about the compounds is safe, e.g. compounds in AD-ES dataset (approved drugs), the parameter unsure_if_toxic should be set to False, otherwise True (default)
 
+    with open('/data/local/Druglikness_prediction/dataset_characteristic_check/training_data_fpe.pkl', 'rb') as f:
+        trainingdata_fpe = pickle.load(f) # this fpe don't need to be generated again
+    
+    result_with_score, cloest_distance = Trialblazer(training_target_features,y,M2FPs_PBFPs,test_set, 0.06264154114736771, 900, trainingdata_fpe, unsure_if_toxic=False)
+    # if the user sure about the compounds is safe, e.g. compounds in AD-ES dataset (approved drugs), the parameter unsure_if_toxic should be set to False, otherwise True (default)
+    
     """The ideal way of the model function can be something like this (this "Trialblazer_compeleted" function doesn't exist now):"""
-    result_with_score = Trialblazer_compeleted(test_set)
+    result_with_score, cloest_distance = Trialblazer_compeleted(test_set)
     print(
         "the PrOCTOR score and prediction results for each compound in the test set are: XXX"
     )
