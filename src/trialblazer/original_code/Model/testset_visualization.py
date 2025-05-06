@@ -134,7 +134,6 @@ def SuspectedAdverseDrugEvents_count_for_eachdrug(prediction_combine):
         rotation=45,
         ha="right",
         fontsize=8,
-        fontfamily="Arial",
     )
 
     plt.xlabel("Drug", fontsize=10)
@@ -176,7 +175,7 @@ def SuspectedAdverseDrugEvents_Totalcount_for_eachdrug(prediction_combine):
     plt.axvline(x=separation_x, color='navy', linestyle='--', linewidth=2)
     plt.text(separation_x - 3, plt.ylim()[1] * 0.9, 'Benign', fontsize=10, fontweight='bold',ha='right', color='#8ea5c8')
     plt.text(separation_x + 3, plt.ylim()[1] * 0.9, 'Toxic', fontsize=10, fontweight='bold',ha='left', color='#a17db4')
-    plt.xticks(ticks=x_indexes, labels=prediction_combine['Drugs'], rotation=45, ha="right",fontsize=8, fontfamily='Arial')
+    plt.xticks(ticks=x_indexes, labels=prediction_combine['Drugs'], rotation=45, ha="right",fontsize=8)
     plt.xlabel('Drug')
     plt.ylabel('Total count of adverse reactions')
     plt.tight_layout()
@@ -247,10 +246,9 @@ def SuspectedAdverseDrugEvents_count(
         rotation=45,
         ha="right",
         fontsize=10,
-        fontname="Arial",
     )
-    ax.set_ylabel("Count", fontsize=12, fontname="Arial")
-    ax.set_xlabel("Adverse drug reaction", fontsize=12, fontname="Arial")
+    ax.set_ylabel("Count", fontsize=12)
+    ax.set_xlabel("Adverse drug reaction", fontsize=12)
     ax.legend()
     plt.show()
 
