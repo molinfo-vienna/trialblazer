@@ -39,9 +39,11 @@ from .Descriptor_calculation.process_target_features import (
 module_folder = os.path.join(os.path.dirname(__file__), "..")
 
 test_folder_data = os.path.join(module_folder, "..", "..", "tests", "data")
-test_out_folder = (
+test_out_folder_obj = (
     tempfile.TemporaryDirectory()
 )  # os.path.join(test_folder_data, "..", "temp")
+test_out_folder = test_out_folder_obj.name
+
 
 model_folder = Path(module_folder) / "data" / "base_model"
 temp_folder = tempfile.TemporaryDirectory()
@@ -52,6 +54,7 @@ def run():
     """Step 1, preprocess compounds"""
     # refinedInputFile = "/data/local/Druglikness_prediction/external_test_set/approved_testset_final_withname.csv"
     refinedInputFile = os.path.join(test_folder_data, "test_input.csv")
+
     refinedOutputFolder = Path(test_out_folder)
     preprocess(
         refinedInputFile, refinedOutputFolder
