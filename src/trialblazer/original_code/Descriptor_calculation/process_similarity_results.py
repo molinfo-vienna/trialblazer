@@ -3,12 +3,12 @@ from pathlib import Path
 import pandas as pd
 from tqdm import tqdm
 
-
 def separate_similarity_results(
     results,
     target_id_list,
     preprocessed_target_unique_smiles,
     output_path_temp_save,
+    training_data=False,
     start_index=0,
 ):
     default_value = -1
@@ -21,9 +21,12 @@ def separate_similarity_results(
         smi_save = []
         sim_dict = dict.fromkeys(target_id_list, default_value)
         for value in array:
-            p = preprocessed_target_unique_smiles.iloc[value[0] - 1][
-                "target_id"
-            ]
+            if training_data:
+                p = preprocessed_target_unique_smiles.iloc[value[0]][
+                    "target_id"
+                ]
+            else:
+                p = target_id_list.iloc[value[0]]
             if any(item in target_id_list for item in p):
                 for target in p:
                     sim_dict[target] = max(sim_dict[target], value[1])

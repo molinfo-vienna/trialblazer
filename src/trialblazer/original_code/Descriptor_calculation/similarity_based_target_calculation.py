@@ -89,12 +89,7 @@ def generate_h5file(preprocessed_target, outputFolder):
         "SmilesWithoutStereo"
     ].tolist()
     print(f"numbers of unique SMILES:{len(list_smi)}")
-    create_db_file(
-        list_smi,
-        outputFolder,
-        "Morgan",
-        {"radius": 2, "nBits": 2048},
-    )
+    
     fpe = FPSim2Engine(outputFolder)
     print("h5 file generated!")
     return target_id_list, preprocessed_target_unique_smiles, fpe
