@@ -39,7 +39,9 @@ from .Descriptor_calculation.process_target_features import (
 module_folder = os.path.join(os.path.dirname(__file__), "..")
 
 test_folder_data = os.path.join(module_folder, "..", "..", "tests", "data")
-test_out_folder = os.path.join(test_folder_data, "..", "temp")
+test_out_folder = (
+    tempfile.TemporaryDirectory()
+)  # os.path.join(test_folder_data, "..", "temp")
 
 model_folder = Path(module_folder) / "data" / "base_model"
 temp_folder = tempfile.TemporaryDirectory()
