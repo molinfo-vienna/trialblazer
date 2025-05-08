@@ -39,23 +39,24 @@ from .Descriptor_calculation.process_target_features import (
 module_folder = os.path.join(os.path.dirname(__file__), "..")
 
 test_folder_data = os.path.join(module_folder, "..", "..", "tests", "data")
-test_out_folder_obj = (
-    tempfile.TemporaryDirectory()
-)  # os.path.join(test_folder_data, "..", "temp")
-test_out_folder = test_out_folder_obj.name
+
+base_model_folder = Path(module_folder) / "data" / "base_model"
 
 
-model_folder = Path(module_folder) / "data" / "base_model"
-temp_folder = tempfile.TemporaryDirectory()
-temp_folder2 = tempfile.TemporaryDirectory()
+def run(model_folder=base_model_folder, out_folder=None, data_folder=test_folder_data):
+    if out_folder is None:
+        out_folder_obj = (
+            tempfile.TemporaryDirectory()
+        )  # os.path.join(test_folder_data, "..", "temp")
+        tout_folder = out_folder_obj.name
 
-
-def run():
+    temp_folder = tempfile.TemporaryDirectory()
+    temp_folder2 = tempfile.TemporaryDirectory()
     """Step 1, preprocess compounds"""
     # refinedInputFile = "/data/local/Druglikness_prediction/external_test_set/approved_testset_final_withname.csv"
     refinedInputFile = os.path.join(test_folder_data, "test_input.csv")
 
-    refinedOutputFolder = Path(test_out_folder)
+    refinedOutputFolder = Path(out_folder)
     preprocess(
         refinedInputFile, refinedOutputFolder
     )  # input: a dataframe with SMILES and ID, outpyut: a folder with the preprocessed files
@@ -64,14 +65,14 @@ def run():
     )  # generate a csv file from log to check the output result
 
     """Step 2, separate multicomponents"""
-    DB_processedDir = Path(test_out_folder) / "preprocessedSmiles"
+    DB_processedDir = Path(out_folder) / "preprocessedSmiles"
     # the folder generated from step 1
     separate_multicomponents_test(
         DB_processedDir
     )  # input: a folder with the preprocessed files, output: a folder with the separated multicomponents, for this step, I modified the script from anya
 
     """Step 3, remove duplicates"""
-    refinedInputFolder = Path(test_out_folder) / "separate_multicom_GetMolFrags"
+    refinedInputFolder = Path(out_folder) / "separate_multicom_GetMolFrags"
     # the folder generated from step 2
     refinedOutputFolder = refinedInputFolder.parent / "uniqueSmiles"
     if not refinedOutputFolder.exists():
@@ -81,7 +82,7 @@ def run():
     )  # input: a folder with the separated multicomponents, output: a folder with the unique smiles files
 
     """Step 4, combine the unique smiles files, this step I haven't made it into a function"""
-    unique_smiles_path = Path(test_out_folder) / "uniqueSmiles"
+    unique_smiles_path = Path(out_folder) / "uniqueSmiles"
 
     df_list = []
     for filenames in os.listdir(unique_smiles_path):
