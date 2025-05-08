@@ -26,7 +26,7 @@ def separate_similarity_results(
                     "target_id"
                 ]
             else:
-                p = target_id_list.iloc[value[0]]
+                p = target_id_list[value[0]]
             if any(item in target_id_list for item in p):
                 for target in p:
                     sim_dict[target] = max(sim_dict[target], value[1])
