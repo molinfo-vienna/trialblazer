@@ -190,6 +190,11 @@ def run(model_folder=base_model_folder, out_folder=None, data_folder=test_folder
     testset_filtered_targets, testset_target_list = remove_tested_inactive_targets(
         testset_inactive_binarized_target_remain, testset_active_binarized_target_remain
     )  # testset_filtered_targets is the target features I need for testset compounds
+    
+    testset_filtered_targets_id = testset_filtered_targets.merge(preprocessed_df_mw[['SmilesForDropDu','id']], how ='left', on='SmilesForDropDu')
+    
+    testset_filtered_targets.to_csv('/home/hzhang/HuanniZ/Data_Trialblazer/test_testset_filtered_targets.csv')
+    preprocessed_df_mw.to_csv('/home/hzhang/HuanniZ/Data_Trialblazer/test_preprocessed_df_mw.csv')
 
     """Step 8, calculate Morgan2 fingerprints for the training and test data"""
     n_bits = 2048
@@ -197,17 +202,16 @@ def run(model_folder=base_model_folder, out_folder=None, data_folder=test_folder
     training_target_features = add_morgan_fingerprints(
         training_target_features, morgan_cols
     )
-    testset_filtered_targets = add_morgan_fingerprints(
-        testset_filtered_targets, morgan_cols
+    testset_filtered_targets_id = add_morgan_fingerprints(
+        testset_filtered_targets_id, morgan_cols
     )
-
+    testset_filtered_targets_id.to_csv('/home/hzhang/HuanniZ/Data_Trialblazer/test_testset_filtered_targets_id.csv')
     """Final step, employ the model"""
     # The input of Trialblazer is a dataframe of training featrues and the binary label of each compound, and the test set,
     # the output including a dataframe with the PrOCTOR socre and prediction results for each compound in test set, and the cloestest similairty between test compounds and training compounds
     M2FPs_PBFPs = morgan_cols + training_target_list
     y = training_target_features.Mark
-    test_set = testset_filtered_targets
-
+    test_set = testset_filtered_targets_id
     with open(
         "/data/local/Druglikness_prediction/dataset_characteristic_check/training_data_fpe.pkl",
         "rb",
@@ -225,12 +229,14 @@ def run(model_folder=base_model_folder, out_folder=None, data_folder=test_folder
         unsure_if_toxic=False,
     )
     # if the user sure about the compounds is safe, e.g. compounds in AD-ES dataset (approved drugs), the parameter unsure_if_toxic should be set to False, otherwise True (default)
+    result_with_score.to_csv('/home/hzhang/HuanniZ/Data_Trialblazer/test_result_with_score.csv')
+    cloest_distance.to_csv('/home/hzhang/HuanniZ/Data_Trialblazer/test_cloest_distance.csv')
 
     """The ideal way of the model function can be something like this (this "Trialblazer_compeleted" function doesn't exist now):"""
-    result_with_score, cloest_distance = Trialblazer_compeleted(test_set)
-    print(
-        "the PrOCTOR score and prediction results for each compound in the test set are: XXX"
-    )
+    # result_with_score, cloest_distance = Trialblazer_compeleted(test_set)
+    # print(
+    #     "the PrOCTOR score and prediction results for each compound in the test set are: XXX"
+    # )
 
     # example files:
     test_set = "/home/hzhang/HuanniZ/Data/example/trialblazer_draft/approved_testset_final_withname.csv"

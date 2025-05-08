@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 import pandas as pd
+import numpy as np
 from tqdm import tqdm
 
 def separate_similarity_results(
@@ -11,6 +12,7 @@ def separate_similarity_results(
     training_data=False,
     start_index=0,
 ):
+    print(results.head(3))
     default_value = -1
     for i, array in tqdm(
         generator_separate_results(results, start_index=start_index),
@@ -26,7 +28,9 @@ def separate_similarity_results(
                     "target_id"
                 ]
             else:
-                p = target_id_list[value[0]]
+                p = preprocessed_target_unique_smiles.iloc[value[0]][
+                    "target_id"
+                ]
             if any(item in target_id_list for item in p):
                 for target in p:
                     sim_dict[target] = max(sim_dict[target], value[1])
@@ -35,7 +39,7 @@ def separate_similarity_results(
         temp_save["smi"] = smi_save
         temp_save["dict"] = dict_save
         temp_save.to_csv(
-            Path(output_path_temp_save + "/" + "temp_save_" + str(i) + ".csv"),
+            Path(output_path_temp_save.name) / f"temp_save_{i}.csv",
             sep="|",
         )
     print("the separation of simialrity results is finished!")
@@ -49,7 +53,8 @@ def organize_similarity_results(
     whole_df = read_results_from_file(output_path_temp_save)
     parsed_dicts = []
     for value in tqdm(whole_df["dict"]):
-        parsed = eval(value, {"nan": float("nan")})
+        parsed = eval(value, {"__builtins__": {}, "nan": float("nan"), "np": np})
+        # parsed = eval(value, {"nan": float("nan")})
         parsed_dicts.append(parsed)
     whole_df["dict_con"] = parsed_dicts
     all_lists = []
@@ -74,8 +79,8 @@ def organize_similarity_results(
 
 def read_results_from_file(output_temp_save):
     whole_df = pd.DataFrame()
-    for file in tqdm(os.listdir(output_temp_save)):
-        filename = Path(output_temp_save + "/" + file)
+    for file in tqdm(os.listdir(output_temp_save.name)):
+        filename = Path(output_temp_save.name) / file
         df1 = pd.read_csv(filename, sep="|")
         whole_df = pd.concat([whole_df, df1], ignore_index=True)
     return whole_df
