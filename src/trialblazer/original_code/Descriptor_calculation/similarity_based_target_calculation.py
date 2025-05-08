@@ -1,9 +1,7 @@
 import numpy as np
 import pandas as pd
 from FPSim2 import FPSim2Engine
-from FPSim2.io import create_db_file
 from rdkit import Chem
-
 
 def target_features_preprocess(
     chembl_data,
@@ -89,12 +87,7 @@ def generate_h5file(preprocessed_target, outputFolder):
         "SmilesWithoutStereo"
     ].tolist()
     print(f"numbers of unique SMILES:{len(list_smi)}")
-    create_db_file(
-        list_smi,
-        outputFolder,
-        "Morgan",
-        {"radius": 2, "nBits": 2048},
-    )
+
     fpe = FPSim2Engine(outputFolder)
     print("h5 file generated!")
     return target_id_list, preprocessed_target_unique_smiles, fpe

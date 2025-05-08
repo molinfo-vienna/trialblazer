@@ -57,6 +57,7 @@ def process_target_features(
         target_ids,
         preprocessed_target_unique_smiles,
         output_path_temp_save,
+        training_data = training_data
     )  # kernal crush
 
     print("start to organize similarity results")
