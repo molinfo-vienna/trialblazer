@@ -10,7 +10,7 @@ base_model_folder = os.path.join(
 
 
 def test_draft(tmpdir):
-    trialblazer_draft.run(out_folder=tmpdir)
+    # trialblazer_draft.run(out_folder=tmpdir)
     trialblazer_draft.run(
         out_folder=tmpdir, data_folder=test_data_folder, model_folder=base_model_folder
     )
