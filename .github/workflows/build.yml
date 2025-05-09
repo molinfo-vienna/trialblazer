@@ -35,6 +35,14 @@ jobs:
           python -m pip install --upgrade pip setuptools
           python -m pip install .
           python -m pip install .[dev,publishing]
+      - name: Git annex files download
+        run: |
+          # git annex init
+          wget ${{ secrets.BASE_MODEL_DATA }} -O base_model_download.zip
+          unzip -d base_model_download base_model_download.zip
+          cd base_model_download
+          mv src/trialblazer/data/base_model src/trialblazer/data/base_model_old
+          mv base_model src/trialblazer/data/base_model
       - name: Run unit tests
         run: python -m pytest -v
       - name: Verify that we can build the package
