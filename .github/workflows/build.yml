@@ -38,6 +38,8 @@ jobs:
       - name: Git annex files download
         run: |
           # git annex init
+          pwd
+          ls -alh
           wget ${{ secrets.BASE_MODEL_DATA }} -O base_model_download.zip
           unzip -d base_model_download base_model_download.zip
           cd base_model_download
