@@ -12,7 +12,6 @@ def separate_similarity_results(
     training_data=False,
     start_index=0,
 ):
-    print(results.head(3))
     default_value = -1
     for i, array in tqdm(
         generator_separate_results(results, start_index=start_index),
@@ -54,7 +53,6 @@ def organize_similarity_results(
     parsed_dicts = []
     for value in tqdm(whole_df["dict"]):
         parsed = eval(value, {"__builtins__": {}, "nan": float("nan"), "np": np})
-        # parsed = eval(value, {"nan": float("nan")})
         parsed_dicts.append(parsed)
     whole_df["dict_con"] = parsed_dicts
     all_lists = []
