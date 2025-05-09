@@ -190,9 +190,10 @@ def run(model_folder=base_model_folder, out_folder=None, data_folder=test_folder
     testset_filtered_targets, testset_target_list = remove_tested_inactive_targets(
         testset_inactive_binarized_target_remain, testset_active_binarized_target_remain
     )  # testset_filtered_targets is the target features I need for testset compounds
-    
-    testset_filtered_targets_id = testset_filtered_targets.merge(preprocessed_df_mw[['SmilesForDropDu','id']], how ='left', on='SmilesForDropDu')
-    
+
+    testset_filtered_targets_id = testset_filtered_targets.merge(
+        preprocessed_df_mw[["SmilesForDropDu", "id"]], how="left", on="SmilesForDropDu"
+    )
 
     """Step 8, calculate Morgan2 fingerprints for the training and test data"""
     n_bits = 2048
@@ -211,7 +212,7 @@ def run(model_folder=base_model_folder, out_folder=None, data_folder=test_folder
     y = training_target_features.Mark
     test_set = testset_filtered_targets_id
     with open(
-        "/data/local/Druglikness_prediction/dataset_characteristic_check/training_data_fpe.pkl",
+        Path(model_folder) / "training_data_fpe.pkl",
         "rb",
     ) as f:
         trainingdata_fpe = pickle.load(f)  # this fpe don't need to be generated again
