@@ -46,11 +46,6 @@ jobs:
         if: steps.cache-trialblazer.outputs.cache-hit != 'true'
         run: |
           # git annex init
-          pwd
-          ls -alh
-          ls -alh src
-          ls -alh src/trialblazer
-          find src/trialblazer/data
           wget ${{ secrets.BASE_MODEL_DATA }} -O base_model_download.zip -nv
       - name: Files unzip
         run: |

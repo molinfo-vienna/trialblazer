@@ -43,7 +43,11 @@ test_folder_data = os.path.join(module_folder, "..", "..", "tests", "data")
 base_model_folder = Path(module_folder) / "data" / "base_model"
 
 
-def run(model_folder=base_model_folder, out_folder=None, data_folder=test_folder_data):
+def run(
+    model_folder=base_model_folder,
+    out_folder=None,
+    data_folder=test_folder_data,
+):
     if out_folder is None:
         out_folder_obj = (
             tempfile.TemporaryDirectory()
@@ -54,7 +58,7 @@ def run(model_folder=base_model_folder, out_folder=None, data_folder=test_folder
     temp_folder2 = tempfile.TemporaryDirectory()
     """Step 1, preprocess compounds"""
     # refinedInputFile = "/data/local/Druglikness_prediction/external_test_set/approved_testset_final_withname.csv"
-    refinedInputFile = os.path.join(test_folder_data, "test_input.csv")
+    refinedInputFile = os.path.join(data_folder, "test_input.csv")
 
     refinedOutputFolder = Path(out_folder)
     preprocess(
