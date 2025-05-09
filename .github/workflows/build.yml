@@ -35,7 +35,15 @@ jobs:
           python -m pip install --upgrade pip setuptools
           python -m pip install .
           python -m pip install .[dev,publishing]
-      - name: Git annex files download
+      
+      - name: Cache Download
+        id: cache-trialblazer
+        uses: actions/cache@v4
+        with:
+          path: base_model_download.zip
+          key: trialblazer-base-model
+      - name: Files download
+        if: steps.cache-trialblazer.outputs.cache-hit != 'true'
         run: |
           # git annex init
           pwd
@@ -44,6 +52,7 @@ jobs:
           ls -alh src/trialblazer
           find src/trialblazer/data
           wget ${{ secrets.BASE_MODEL_DATA }} -O base_model_download.zip -nv
+      - name: Files unzip
           unzip -d base_model_download base_model_download.zip
           cd base_model_download
           mv src/trialblazer/data/base_model src/trialblazer/data/base_model_old
