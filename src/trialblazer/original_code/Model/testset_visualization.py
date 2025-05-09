@@ -45,59 +45,32 @@ def plot_score_distribution_with_significance(data, p_values):
 
 
 def plot_correlation(predict_result_toxic, predict_result_benign):
-    plt.figure(figsize=(8, 6))
-    plt.scatter(
-        predict_result_toxic["mw"],
-        predict_result_toxic["PrOCTOR_score"],
-        color="#a17db4",
-        alpha=0.9,
-        label="Predicted toxic drugs",
-    )
+    plt.figure(figsize=(10, 6))
+    all_logP = predict_result_toxic['logP'].tolist() + predict_result_benign['logP'].tolist()
+    all_scores = predict_result_toxic['PrOCTOR_score'].tolist() + predict_result_benign['PrOCTOR_score'].tolist()
+    
+    correlation_logP = np.corrcoef(all_logP, all_scores)[0, 1]
 
-    plt.scatter(
-        predict_result_benign["mw"],
-        predict_result_benign["PrOCTOR_score"],
-        color="#8ea5c8",
-        alpha=0.9,
-        label="Predicted benign drugs",
-    )
-    all_mw = (
-        predict_result_toxic["mw"].tolist()
-        + predict_result_benign["mw"].tolist()
-    )
-    all_scores = (
-        predict_result_toxic["PrOCTOR_score"].tolist()
-        + predict_result_benign["PrOCTOR_score"].tolist()
-    )
-    correlation = np.corrcoef(all_mw, all_scores)[0, 1]
+    scatter = plt.scatter(predict_result_toxic['mw'], predict_result_toxic['PrOCTOR_score'], 
+                        c=predict_result_toxic['logP'], cmap='plasma', alpha=0.9)
+    plt.scatter(predict_result_benign['mw'], predict_result_benign['PrOCTOR_score'], 
+                c=predict_result_benign['logP'], cmap='plasma', alpha=0.9)
+
+    cbar = plt.colorbar(scatter)
+    cbar.set_label('logP')
+
+    all_mw = predict_result_toxic['mw'].tolist() + predict_result_benign['mw'].tolist()
+    correlation_mw = np.corrcoef(all_mw, all_scores)[0, 1]
+
     decision_threshold = 0.06264154114736771
-    prediction_threshold = np.log2(
-        (1 - decision_threshold) / decision_threshold,
-    )
-    print(f"Prediction threshold: {prediction_threshold}")
-    plt.axhline(
-        y=prediction_threshold,
-        color="navy",
-        linestyle="--",
-        linewidth=1.5,
-        label="Prediction threshold",
-    )
-    plt.text(
-        633,
-        2.3,
-        f"Prediction threshold = {prediction_threshold:.2f}",
-        fontsize=10,
-        color="black",
-    )
-    plt.text(
-        140,
-        27,
-        f"r (Pearson) = {correlation:.2f}",
-        fontsize=10,
-        color="black",
-    )
-    plt.xlabel("Molecular Weight (mw)")
-    plt.ylabel("PrOCTOR Score")
+    prediction_threshold = np.log2((1 - decision_threshold) / decision_threshold)
+    plt.axhline(y=prediction_threshold, color='navy', linestyle='--', linewidth=1.5, label="Prediction threshold")
+    plt.text(633, 2.2, f"Threshold = {prediction_threshold:.2f}", fontsize=10, color='black')
+    plt.text(140, 32, f"r (MW) = {correlation_mw:.2f}", fontsize=10, color='black')
+    plt.text(140, 30.5, f"r (logP) = {correlation_logP:.2f}", fontsize=10, color='black')
+
+    plt.xlabel('Molecular Weight (mw)')
+    plt.ylabel('PrOCTOR Score')
     plt.legend()
     plt.grid(True)
     plt.show()
