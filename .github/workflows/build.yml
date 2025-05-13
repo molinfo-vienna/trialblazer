@@ -17,10 +17,28 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
-        python-version: ['3.10', '3.11', '3.12']
+        # os: ['ubuntu-latest', 'macos-latest', 'windows-latest']
+        # python-version: ['3.10', '3.11', '3.12']
+        os: ['ubuntu-latest']
+        python-version: ['3.12']
     steps:
       - uses: actions/checkout@v4
+      - name: Cache Download
+        id: cache-trialblazer
+        uses: actions/cache@v4
+        with:
+          path: base_model_download.zip
+          key: trialblazer-base-model
+      - name: Files download
+        if: steps.cache-trialblazer.outputs.cache-hit != 'true'
+        run: |
+          # git annex init
+          wget ${{ secrets.BASE_MODEL_DATA }} -O base_model_download.zip -nv
+      - name: Files unzip
+        run: |
+          unzip -d base_model_download base_model_download.zip
+          mv src/trialblazer/data/base_model src/trialblazer/data/base_model_old
+          mv base_model_download/base_model src/trialblazer/data/base_model
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:

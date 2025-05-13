@@ -5,7 +5,9 @@ from trialblazer.original_code import trialblazer_draft
 
 test_data_folder = os.path.join(os.path.dirname(__file__), "data")
 base_model_folder = os.path.join(
-    os.path.dirname(trialblazer.__file__), "data", "base_model"
+    os.path.dirname(trialblazer.__file__),
+    "data",
+    "base_model",
 )
 
 
