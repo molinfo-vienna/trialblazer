@@ -466,4 +466,10 @@ def Trialblazer(training_set,y,features, test_set, threshold, k, training_fpe, u
     
     # Applicability domain
     similarity_cloest_distance = pairwise_tanimoto_similarity_cloest_distance(list(training_set['SmilesForDropDu']), list(predict_result_sim['SmilesForDropDu']), training_fpe)
-    return predict_result_sim, similarity_cloest_distance[['smi','cloest_distance','cloest_smi']]
+    
+    # prediction output
+    predict_result_sim.rename(columns={'SmilesForDropDu':'smi'}, inplace=True)
+    prediction_output = predict_result_sim.merge(similarity_cloest_distance[['smi','cloest_distance','cloest_smi']], how='left', on='smi')
+    prediction_output['prediction'] = prediction_output['prediction'].map({0: 'benign', 1: 'toxic'})
+    
+    return prediction_output

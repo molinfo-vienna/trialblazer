@@ -216,7 +216,7 @@ def run(model_folder=base_model_folder, out_folder=None, data_folder=test_folder
     ) as f:
         trainingdata_fpe = pickle.load(f)  # this fpe don't need to be generated again
 
-    result_with_score, cloest_distance = Trialblazer(
+    prediction = Trialblazer(
         training_target_features,
         y,
         M2FPs_PBFPs,
@@ -226,6 +226,7 @@ def run(model_folder=base_model_folder, out_folder=None, data_folder=test_folder
         trainingdata_fpe,
         unsure_if_toxic=False,
     )
+
     # if the user sure about the compounds is safe, e.g. compounds in AD-ES dataset (approved drugs), the parameter unsure_if_toxic should be set to False, otherwise True (default)
 
     """The ideal way of the model function can be something like this (this "Trialblazer_compeleted" function doesn't exist now):"""
@@ -236,7 +237,7 @@ def run(model_folder=base_model_folder, out_folder=None, data_folder=test_folder
 
     # example files:
     test_set = "/home/hzhang/HuanniZ/Data/example/trialblazer_draft/approved_testset_final_withname.csv"
-    result_with_score = "/home/hzhang/HuanniZ/Data/example/trialblazer_draft/approved_drug_with_score.csv"
+    prediction = "/home/hzhang/HuanniZ/Data/example/trialblazer_draft/approved_drug_with_score.csv"
 
 
 if __name__ == "__main__":
