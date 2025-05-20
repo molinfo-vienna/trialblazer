@@ -7,9 +7,9 @@ from matplotlib import cm
 
 def plot_score_distribution_with_significance(data, p_values):
     custom_palette = {
-        "Benign compounds\nTraining set": "#8ea5c8",
-        "Toxic compounds\nTraining set": "#a17db4",
-        "Benign compounds\nTest set": "#B36A6F",
+        "Benign compounds\nTraining set": "#ff7f00",
+        "Toxic compounds\nTraining set": "#984ea3",
+        "Benign compounds\nTest set": "orangered",
     }
     plt.figure(figsize=(6, 6))
     ax = sns.violinplot(
@@ -142,7 +142,7 @@ def SuspectedAdverseDrugEvents_count_for_eachdrug(prediction_combine):
 def SuspectedAdverseDrugEvents_Totalcount_for_eachdrug(prediction_combine):
     x_indexes = np.arange(len(prediction_combine['Drugs']))
     fig, ax = plt.subplots(figsize=(12, 6))
-    plt.bar(x_indexes, prediction_combine['Total'], color='#B36A6F')
+    plt.bar(x_indexes, prediction_combine['Total'], color='orangered')
     mid_index = len(prediction_combine['Drugs']) // 2
     separation_x = (x_indexes[mid_index - 1] + x_indexes[mid_index]) / 2
     plt.axvline(x=separation_x, color='navy', linestyle='--', linewidth=2)
@@ -175,8 +175,8 @@ def SuspectedAdverseDrugEvents_count(
         "Serious": toxic_serious_list_array.sum(axis=1),
     }
     width = 0.4
-    base_color_benign = "#8ea5c8"
-    base_color_toxic = "#a17db4"
+    base_color_benign = "#ff7f00"
+    base_color_toxic = "#984ea3"
     alphas = [0.6, 0.8]
     offset = 0.2
 
