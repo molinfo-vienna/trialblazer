@@ -13,6 +13,10 @@
 | **Other best practices**           | &nbsp; |
 | Documentation                      | [![Documentation Status](https://readthedocs.org/projects/trialblazer/badge/?version=latest)](https://trialblazer.readthedocs.io/en/latest/?badge=latest) || **GitHub Actions**                 | &nbsp; |
 | Build                              | [![build](https://github.com/molinfo-vienna/trialblazer/actions/workflows/build.yml/badge.svg)](https://github.com/molinfo-vienna/trialblazer/actions/workflows/build.yml) |
+## Data
+You can download the data, including training data, test set data with corresponding prediction results, and bioactivity data, from: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15484761.svg)](https://doi.org/10.5281/zenodo.15484761)
+
+
 ## How to use trialblazer
 
 A Chemistry-Focused Predictor of Toxicity Risks in Late-Stage Drug Development
