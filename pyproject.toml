@@ -24,6 +24,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 dependencies = [
+"click",
 "pandas",
 "rdkit",
 "numpy",
@@ -75,6 +76,10 @@ publishing = [
 Repository = "https://github.com/molinfo-vienna/trialblazer"
 Issues = "https://github.com/molinfo-vienna/trialblazer/issues"
 ReadTheDocs = "https://trialblazer.readthedocs.io"
+
+
+[project.scripts]
+trialblazer = "trialblazer.__main__:main"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

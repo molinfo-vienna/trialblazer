@@ -17,9 +17,9 @@
 
 # -- Project information -----------------------------------------------------
 
-project = u"trialblazer"
-copyright = u"2025-04-28 19:01:40, Huanni Zhang"
-author = u"Huanni Zhang"
+project = "trialblazer"
+copyright = "2025-04-28 19:01:40, Huanni Zhang"
+author = "Huanni Zhang"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -61,7 +61,7 @@ todo_include_todos = False
 
 # -- Use autoapi.extension to run sphinx-apidoc -------
 
-autoapi_dirs = ['../src/trialblazer']
+autoapi_dirs = ["../src/trialblazer"]
 
 # -- Options for HTML output ----------------------------------------------
 
@@ -79,7 +79,7 @@ html_theme = "sphinx_rtd_theme"
 # -- Options for Intersphinx
 
 intersphinx_mapping = {
-    'python': ('https://docs.python.org/3', None),
+    "python": ("https://docs.python.org/3", None),
     # Commonly used libraries, uncomment when used in package
     # 'numpy': ('http://docs.scipy.org/doc/numpy/', None),
     # 'scipy': ('http://docs.scipy.org/doc/scipy/reference/', None),

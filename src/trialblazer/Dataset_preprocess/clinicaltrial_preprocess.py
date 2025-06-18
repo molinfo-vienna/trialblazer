@@ -118,8 +118,8 @@ def toxicity_set(studies_set, drop_withdrawals_set):
     ]
 
     # filter toxicity description in "why_stopped" and "reason" categories
-    selected_toxicity_why_stopped, non_toxicity_why_stopped = (
-        keywords_filtering(studies_simplify_dropna_sim, "why_stopped")
+    selected_toxicity_why_stopped, non_toxicity_why_stopped = keywords_filtering(
+        studies_simplify_dropna_sim, "why_stopped"
     )
     selected_toxicity_reason, non_toxicity_reason = keywords_filtering(
         drop_withdrawals_dropna_sim,
@@ -174,12 +174,8 @@ def preprocess_aact(unzipFolder_path):
             input_file = os.path.join(unzipFolder_path, filename)
 
             studies_str_path = input_file + "/" + "studies" + ".txt"
-            interventions_str_path = (
-                input_file + "/" + "interventions" + ".txt"
-            )
-            drop_withdrawals_str_path = (
-                input_file + "/" + "drop_withdrawals" + ".txt"
-            )
+            interventions_str_path = input_file + "/" + "interventions" + ".txt"
+            drop_withdrawals_str_path = input_file + "/" + "drop_withdrawals" + ".txt"
 
             studies_set = pd.read_csv(studies_str_path, sep="|")
             interventions_set = pd.read_csv(interventions_str_path, sep="|")
@@ -189,8 +185,8 @@ def preprocess_aact(unzipFolder_path):
             )
 
             Agg_name, intervention_set_ori = check_name(interventions_set)
-            toxicity_negative, toxicity_negative_excluded_inclnan = (
-                toxicity_set(studies_set, drop_withdrawals_set)
+            toxicity_negative, toxicity_negative_excluded_inclnan = toxicity_set(
+                studies_set, drop_withdrawals_set
             )
 
             # Append the results in different files
@@ -208,13 +204,14 @@ def preprocess_aact(unzipFolder_path):
     )
     Agg_name_append_total = pd.concat(Agg_name_append, axis=0)
     intervention_set_ori_total = pd.concat(intervention_set_ori_append, axis=0)
-    toxicity_negative_onedrug, toxicity_negative_exclude_onedrug = (
-        map_names_intervention(
-            Agg_name_append_total,
-            intervention_set_ori_total,
-            toxicity_negative_set_total,
-            toxicity_negative_excluded_append_total,
-        )
+    (
+        toxicity_negative_onedrug,
+        toxicity_negative_exclude_onedrug,
+    ) = map_names_intervention(
+        Agg_name_append_total,
+        intervention_set_ori_total,
+        toxicity_negative_set_total,
+        toxicity_negative_excluded_append_total,
     )
     return (
         Agg_name_append_total,
@@ -234,9 +231,12 @@ def prepocess_wholeset(count_path):
         if not filename.endswith(".zip") and match:
             input_file = os.path.join(count_path, filename)
             print(input_file)
-            Agg_name, toxic_onedrug, benign_onedrug, intervention_set_ori = (
-                preprocess_aact(input_file)
-            )
+            (
+                Agg_name,
+                toxic_onedrug,
+                benign_onedrug,
+                intervention_set_ori,
+            ) = preprocess_aact(input_file)
 
             toxic_append.append(toxic_onedrug)
             benign_onedrug_append.append(benign_onedrug)
@@ -253,9 +253,7 @@ def prepocess_wholeset(count_path):
 
     Merge_name_append_count = toxic_append_total.nct_id.unique().size
     Agg_name_append_count = Agg_name_append_total.nct_id.unique().size
-    intervention_set_ori_count = (
-        intervention_set_ori_append_total.nct_id.unique().size
-    )
+    intervention_set_ori_count = intervention_set_ori_append_total.nct_id.unique().size
 
     check_other_phase = count_path + "/" + "check_other_phase_1"
     if not os.path.exists(check_other_phase):

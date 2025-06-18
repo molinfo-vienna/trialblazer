@@ -3,6 +3,7 @@ import pandas as pd
 from FPSim2 import FPSim2Engine
 from rdkit import Chem
 
+
 def target_features_preprocess(
     chembl_data,
     preprocessed_chembl_data,
@@ -31,9 +32,9 @@ def target_features_preprocess(
     merged_data["SmilesWithoutStereo"] = merged_data["MolWithoutStereo"].apply(
         lambda x: Chem.MolToSmiles(x, isomericSmiles=False),
     )
-    target_label_smpl = merged_data[
-        ["target_id", "SmilesWithoutStereo"]
-    ].dropna(subset=["target_id"])
+    target_label_smpl = merged_data[["target_id", "SmilesWithoutStereo"]].dropna(
+        subset=["target_id"]
+    )
     target_id_list, preprocessed_target_unique_smiles, fpe = generate_h5file(
         target_label_smpl,
         outputFolder,
@@ -83,9 +84,7 @@ def generate_h5file(preprocessed_target, outputFolder):
         .apply(list)
         .reset_index()
     )
-    list_smi = preprocessed_target_unique_smiles[
-        "SmilesWithoutStereo"
-    ].tolist()
+    list_smi = preprocessed_target_unique_smiles["SmilesWithoutStereo"].tolist()
     print(f"numbers of unique SMILES:{len(list_smi)}")
 
     fpe = FPSim2Engine(outputFolder)

@@ -386,6 +386,7 @@ def feature_selection(X, y, feature_list, name, k_list):
     ax.legend(loc="lower right", fontsize=7)
     plt.show()
 
+
 def pairwise_tanimoto_similarity_cloest_distance(smi_list, query_set_smi_list, fpe):
     default_value = -1
     results = []
@@ -395,15 +396,25 @@ def pairwise_tanimoto_similarity_cloest_distance(smi_list, query_set_smi_list, f
         for idx, value in sim_results:
             p = smi_list[idx]
             if value > sim_dict[p]:
-                sim_dict[p]=value
-        results.append({'smi':my_smi,'dict':sim_dict})
+                sim_dict[p] = value
+        results.append({"smi": my_smi, "dict": sim_dict})
     temp_save = pd.DataFrame(results)
-    temp_save[smi_list] = [list(value_1.values()) for value_1 in temp_save['dict']]
-    temp_save['cloest_distance'] = temp_save[smi_list].max(axis=1)
-    temp_save['cloest_smi'] = temp_save[smi_list].idxmax(axis=1)
-    return temp_save.drop(columns=['dict'])
+    temp_save[smi_list] = [list(value_1.values()) for value_1 in temp_save["dict"]]
+    temp_save["cloest_distance"] = temp_save[smi_list].max(axis=1)
+    temp_save["cloest_smi"] = temp_save[smi_list].idxmax(axis=1)
+    return temp_save.drop(columns=["dict"])
 
-def Trialblazer(training_set,y,features, test_set, threshold, k, training_fpe, unsure_if_toxic=True):
+
+def Trialblazer(
+    training_set,
+    y,
+    features,
+    test_set,
+    threshold,
+    k,
+    training_fpe,
+    unsure_if_toxic=True,
+):
     selector = SelectKBest(f_classif, k=k)
     X = training_set[features]
     X_new = selector.fit_transform(X, y)
@@ -427,21 +438,14 @@ def Trialblazer(training_set,y,features, test_set, threshold, k, training_fpe, u
     test_set_aligned["pred_prob_negative"] = y_prob[:, 0]
 
     # PrOCTOR score
-    odd = (
-        test_set_aligned.pred_prob_negative
-        / test_set_aligned.pred_prob_positive
-    )
+    odd = test_set_aligned.pred_prob_negative / test_set_aligned.pred_prob_positive
     PrOCTOR_score = np.log2(odd)
     test_set_aligned["PrOCTOR_score"] = PrOCTOR_score
-    test_set_aligned["PrOCTOR_score"] = test_set_aligned[
-        "PrOCTOR_score"
-    ].apply(
+    test_set_aligned["PrOCTOR_score"] = test_set_aligned["PrOCTOR_score"].apply(
         lambda x: f"{x:.3f}",
     )
     predict_result_sim = test_set_aligned.iloc[:, -6:]
-    predict_result_sim["PrOCTOR_score"] = predict_result_sim[
-        "PrOCTOR_score"
-    ].astype(
+    predict_result_sim["PrOCTOR_score"] = predict_result_sim["PrOCTOR_score"].astype(
         float,
     )
     if unsure_if_toxic:
@@ -451,9 +455,7 @@ def Trialblazer(training_set,y,features, test_set, threshold, k, training_fpe, u
         print(
             "the number of the removed multi-component drugs: ",
             len(
-                predict_result_sim[
-                    predict_result_sim["id"].str.contains(r"\d+x\d+")
-                ],
+                predict_result_sim[predict_result_sim["id"].str.contains(r"\d+x\d+")],
             ),
         )
         predict_result_sim_remove_multi.sort_values(
@@ -463,7 +465,14 @@ def Trialblazer(training_set,y,features, test_set, threshold, k, training_fpe, u
             inplace=True,
         )
         predict_result_sim = predict_result_sim_remove_multi
-    
+
     # Applicability domain
-    similarity_cloest_distance = pairwise_tanimoto_similarity_cloest_distance(list(training_set['SmilesForDropDu']), list(predict_result_sim['SmilesForDropDu']), training_fpe)
-    return predict_result_sim, similarity_cloest_distance[['smi','cloest_distance','cloest_smi']]
+    similarity_cloest_distance = pairwise_tanimoto_similarity_cloest_distance(
+        list(training_set["SmilesForDropDu"]),
+        list(predict_result_sim["SmilesForDropDu"]),
+        training_fpe,
+    )
+    return (
+        predict_result_sim,
+        similarity_cloest_distance[["smi", "cloest_distance", "cloest_smi"]],
+    )

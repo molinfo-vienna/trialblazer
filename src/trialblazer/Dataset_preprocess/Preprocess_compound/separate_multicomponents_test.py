@@ -41,12 +41,8 @@ def separate_multicomponents_test(inputDir):
                                 asMols=True,
                             )
 
-                        smilesList = [
-                            Chem.MolToSmiles(mol) for mol in molFrag_pre
-                        ]
-                        smilesList2 = [
-                            Chem.MolToSmiles(mols) for mols in molFrag_tauto
-                        ]
+                        smilesList = [Chem.MolToSmiles(mol) for mol in molFrag_pre]
+                        smilesList2 = [Chem.MolToSmiles(mols) for mols in molFrag_tauto]
 
                         if len(smilesList) == 1:
                             of.write(line)

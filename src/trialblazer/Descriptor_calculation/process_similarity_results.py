@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 from tqdm import tqdm
 
+
 def separate_similarity_results(
     results,
     target_id_list,
@@ -23,13 +24,9 @@ def separate_similarity_results(
         sim_dict = dict.fromkeys(target_id_list, default_value)
         for value in array:
             if training_data:
-                p = preprocessed_target_unique_smiles.iloc[value[0]][
-                    "target_id"
-                ]
+                p = preprocessed_target_unique_smiles.iloc[value[0]]["target_id"]
             else:
-                p = preprocessed_target_unique_smiles.iloc[value[0]][
-                    "target_id"
-                ]
+                p = preprocessed_target_unique_smiles.iloc[value[0]]["target_id"]
             if any(item in target_id_list for item in p):
                 for target in p:
                     sim_dict[target] = max(sim_dict[target], value[1])
@@ -41,7 +38,7 @@ def separate_similarity_results(
             Path(output_path_temp_save.name) / f"temp_save_{i}.csv",
             sep="|",
         )
-    print("the separation of simialrity results is finished!")
+    print("the separation of similarity results is finished!")
 
 
 def organize_similarity_results(

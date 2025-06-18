@@ -142,9 +142,7 @@ def split_dataframe_by_groups_with_tautomerizedSmiles(
             results_df = remove_smiles_fully_undefined_stereo(
                 pd.concat(frames),
             )
-            outputFile3 = (
-                str(outputFile).split(".")[0] + "_part" + str(i) + ".csv"
-            )
+            outputFile3 = str(outputFile).split(".")[0] + "_part" + str(i) + ".csv"
             print(f"writing down part {i!s} ......")
             results_df[
                 [

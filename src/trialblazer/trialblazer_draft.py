@@ -7,7 +7,7 @@ from pathlib import Path
 import pandas as pd
 import pickle
 import ast
-from .models import Trialblazer
+from .models import Trialblazer as Triablazer_func
 import tempfile
 
 # these three functions are in folder Dataset_preprocess/Preprocess_compound
@@ -221,7 +221,7 @@ def run(
     ) as f:
         trainingdata_fpe = pickle.load(f)  # this fpe don't need to be generated again
 
-    result_with_score, cloest_distance = Trialblazer(
+    result_with_score, closest_distance = Trialblazer_func(
         training_target_features,
         y,
         M2FPs_PBFPs,
@@ -240,8 +240,8 @@ def run(
     # )
 
     # example files:
-    test_set = "/home/hzhang/HuanniZ/Data/example/trialblazer_draft/approved_testset_final_withname.csv"
-    result_with_score = "/home/hzhang/HuanniZ/Data/example/trialblazer_draft/approved_drug_with_score.csv"
+    # test_set = "/home/hzhang/HuanniZ/Data/example/trialblazer_draft/approved_testset_final_withname.csv"
+    # result_with_score = "/home/hzhang/HuanniZ/Data/example/trialblazer_draft/approved_drug_with_score.csv"
 
 
 if __name__ == "__main__":
