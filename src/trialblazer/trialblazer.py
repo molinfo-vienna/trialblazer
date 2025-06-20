@@ -92,7 +92,9 @@ class Trialblazer(object):
         """
         if not hasattr(self, "result") or force:
             self.import_smiles_file(force=force)
-            # self.blah
+            self.load_model()
+            self.preprocess()
+            self.run_model()
         self.result = None
 
     def get_dataframe(self) -> pd.DataFrame:
@@ -118,3 +120,27 @@ class Trialblazer(object):
         else:
             with open(output_file, "w") as f:
                 f.write(str(self.result))
+
+    def run_model(self):
+        """
+        Once the model is loaded and the input data preprocessed, run the prediction
+        """
+        pass
+
+    def preprocess(self):
+        """
+        Preprocess the input data
+        """
+        pass
+
+    def load_model(self):
+        """
+        Load the model
+        """
+        pass
+
+    def train_model(self):
+        """
+        Train the model if the file is not available
+        """
+        pass

@@ -387,7 +387,7 @@ def feature_selection(X, y, feature_list, name, k_list):
     plt.show()
 
 
-def pairwise_tanimoto_similarity_cloest_distance(smi_list, query_set_smi_list, fpe):
+def pairwise_tanimoto_similarity_closest_distance(smi_list, query_set_smi_list, fpe):
     default_value = -1
     results = []
     for my_smi in tqdm(query_set_smi_list, desc="Calculating similarities"):
@@ -400,34 +400,44 @@ def pairwise_tanimoto_similarity_cloest_distance(smi_list, query_set_smi_list, f
         results.append({"smi": my_smi, "dict": sim_dict})
     temp_save = pd.DataFrame(results)
     temp_save[smi_list] = [list(value_1.values()) for value_1 in temp_save["dict"]]
-    temp_save["cloest_distance"] = temp_save[smi_list].max(axis=1)
-    temp_save["cloest_smi"] = temp_save[smi_list].idxmax(axis=1)
+    temp_save["closest_distance"] = temp_save[smi_list].max(axis=1)
+    temp_save["closest_smi"] = temp_save[smi_list].idxmax(axis=1)
     return temp_save.drop(columns=["dict"])
 
 
-def Trialblazer(
+def trialblazer_train(
     training_set,
     y,
     features,
-    test_set,
-    threshold,
     k,
-    training_fpe,
-    unsure_if_toxic=True,
 ):
     selector = SelectKBest(f_classif, k=k)
     X = training_set[features]
     X_new = selector.fit_transform(X, y)
-    test_set_aligned = test_set.reindex(columns=X.columns, fill_value=0)
-    X_test_ANO = selector.transform(test_set_aligned)
     classifier = MLPClassifier(
         hidden_layer_sizes=(10,),
         random_state=42,
         learning_rate_init=0.0001,
         max_iter=600,
     )  # this classifier should be store somewhere so that it won't be trained every time
-
     classifier.fit(X_new, y)
+    return classifier, selector
+
+
+def trialblazer_func(
+    classifier,
+    selector,
+    test_set,
+    threshold,
+    training_fpe,
+    training_set,
+    features,
+    unsure_if_toxic=True,
+):
+    X_columns = features
+    test_set_aligned = test_set.reindex(columns=X_columns, fill_value=0)
+    X_test_ANO = selector.transform(test_set_aligned)
+
     y_prob = classifier.predict_proba(X_test_ANO)
     y_pred_opt = (y_prob[:, 1] >= threshold).astype(int)
 
@@ -467,12 +477,37 @@ def Trialblazer(
         predict_result_sim = predict_result_sim_remove_multi
 
     # Applicability domain
-    similarity_cloest_distance = pairwise_tanimoto_similarity_cloest_distance(
+    similarity_closest_distance = pairwise_tanimoto_similarity_closest_distance(
         list(training_set["SmilesForDropDu"]),
         list(predict_result_sim["SmilesForDropDu"]),
         training_fpe,
     )
     return (
         predict_result_sim,
-        similarity_cloest_distance[["smi", "cloest_distance", "cloest_smi"]],
+        similarity_closest_distance[["smi", "closest_distance", "closest_smi"]],
+    )
+
+
+def Trialblazer(
+    training_set,
+    y,
+    features,
+    test_set,
+    threshold,
+    k,
+    training_fpe,
+    unsure_if_toxic=True,
+):
+    classifier, selector = trialblazer_train(
+        training_set=training_set, y=y, features=features, k=k
+    )
+    return trialblazer_func(
+        classifier=classifier,
+        selector=selector,
+        test_set=test_set,
+        threshold=threshold,
+        training_fpe=training_fpe,
+        unsure_if_toxic=unsure_if_toxic,
+        features=features,
+        training_set=training_set,
     )
