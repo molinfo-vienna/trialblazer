@@ -7,7 +7,9 @@ from pathlib import Path
 import pandas as pd
 import pickle
 import ast
-from .models import Trialblazer as Trialblazer_func
+
+# from .models import Trialblazer as Trialblazer_func
+from .trialblazer import Trialblazer
 import tempfile
 
 # these three functions are in folder Dataset_preprocess/Preprocess_compound
@@ -213,7 +215,20 @@ def run(
     output_path_temp_save_testdata_inactive = (
         temp_folder2  # create a folder to save temperory files for the test data
     )
-    model_data = load_model(model_folder=model_folder)
+
+    tb = Trialblazer(
+        # features=M2FPs_PBFPs,
+        # test_set=test_set,
+    )
+
+    # tb.training_fpe = model_data["training_data_fpe"]
+    # tb.training_set = model_data["training_target_features"]
+    # tb.y = model_data["y"]
+    # tb.train_model()
+
+    tb.load_model()
+    model_data = tb.model_data
+    # model_data = load_model(model_folder=model_folder)
     # Example:
     # if "preprocessed_df_mw" is test data (this is the application of the model):
     (
@@ -264,18 +279,25 @@ def run(
     # The input of Trialblazer is a dataframe of training featrues and the binary label of each compound, and the test set,
     # the output including a dataframe with the PrOCTOR socre and prediction results for each compound in test set, and the cloestest similairty between test compounds and training compounds
     test_set = testset_filtered_targets_id
-    M2FPs_PBFPs = morgan_cols + model_data["training_target_list"]
+    # M2FPs_PBFPs = morgan_cols + model_data["training_target_list"]
 
-    result_with_score, closest_distance = Trialblazer_func(
-        model_data["training_target_features"],
-        model_data["y"],
-        M2FPs_PBFPs,
-        test_set,
-        0.06264154114736771,
-        900,
-        model_data["training_data_fpe"],
-        unsure_if_toxic=False,
+    tb.test_set = test_set
+    tb.run()
+    result_with_score, closest_distance = (
+        tb.result["with_score"],
+        tb.result["closest_distance"],
     )
+
+    # result_with_score, closest_distance = Trialblazer_func(
+    #     model_data["training_target_features"],
+    #     model_data["y"],
+    #     M2FPs_PBFPs,
+    #     test_set,
+    #     0.06264154114736771,
+    #     900,
+    #     model_data["training_data_fpe"],
+    #     unsure_if_toxic=False,
+    # )
     # if the user sure about the compounds is safe, e.g. compounds in AD-ES dataset (approved drugs), the parameter unsure_if_toxic should be set to False, otherwise True (default)
 
     """The ideal way of the model function can be something like this (this "Trialblazer_compeleted" function doesn't exist now):"""

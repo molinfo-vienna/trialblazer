@@ -497,10 +497,13 @@ def Trialblazer(
     k,
     training_fpe,
     unsure_if_toxic=True,
+    classifier=None,
+    selector=None,
 ):
-    classifier, selector = trialblazer_train(
-        training_set=training_set, y=y, features=features, k=k
-    )
+    if classifier is None:
+        classifier, selector = trialblazer_train(
+            training_set=training_set, y=y, features=features, k=k
+        )
     return trialblazer_func(
         classifier=classifier,
         selector=selector,
