@@ -477,15 +477,28 @@ def trialblazer_func(
         predict_result_sim = predict_result_sim_remove_multi
 
     # Applicability domain
+
     similarity_closest_distance = pairwise_tanimoto_similarity_closest_distance(
         list(training_set["SmilesForDropDu"]),
         list(predict_result_sim["SmilesForDropDu"]),
         training_fpe,
     )
-    return (
-        predict_result_sim,
+    # prediction output
+    predict_result_sim.rename(columns={"SmilesForDropDu": "smi"}, inplace=True)
+    prediction_output = predict_result_sim.merge(
         similarity_closest_distance[["smi", "closest_distance", "closest_smi"]],
+        how="left",
+        on="smi",
     )
+    prediction_output["prediction"] = prediction_output["prediction"].map(
+        {0: "benign", 1: "toxic"}
+    )
+
+    # return (
+    #     predict_result_sim,
+    #     similarity_closest_distance[["smi", "closest_distance", "closest_smi"]],
+    # )
+    return prediction_output
 
 
 def Trialblazer(
