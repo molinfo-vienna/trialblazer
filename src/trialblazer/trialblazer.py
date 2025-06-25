@@ -8,6 +8,8 @@ import os
 import csv
 from rdkit import Chem
 from rdkit.Chem import Descriptors
+from rdkit.Chem import PandasTools
+from rdkit.Chem import Draw
 from pathlib import Path
 import pandas as pd
 import pickle
@@ -76,12 +78,17 @@ class Trialblazer(object):
         """
         Importing smiles either from the input file or from a list of smiles
         """
+        # if not hasattr(self, "smiles"):
+        #     init_smiles = []
+        # else:
+        #     init_smiles = self.smiles
+        # set_smiles = set(init_smiles)
+        # self.smiles = init_smiles + [s for s in smiles if s not in set_smiles]
+        smiles_df = pd.DataFrame([dict(SMILES=s) for s in smiles])
         if not hasattr(self, "smiles"):
-            init_smiles = []
+            self.smiles = smiles_df
         else:
-            init_smiles = self.smiles
-        set_smiles = set(init_smiles)
-        self.smiles = init_smiles + [s for s in smiles if s not in set_smiles]
+            self.smiles = pd.concat(self.smiles, smiles_df)
 
     def import_smiles_file(
         self, smiles_file: str | None = None, force: bool = False
@@ -93,9 +100,14 @@ class Trialblazer(object):
             if smiles_file is None:
                 smiles_file = self.input_file
             if smiles_file is not None:
-                with open(smiles_file, "r") as f:
-                    read_smiles = f.read().split("\n")
-                self.import_smiles(read_smiles)
+                smiles_df = pd.read_csv(smiles_file)
+
+                if not hasattr(self, "smiles"):
+                    self.smiles = smiles_df
+                else:
+                    self.smiles = pd.concat(self.smiles, smiles_df)
+                # read_smiles = smiles_df["SMILES"].to_list()
+                # self.import_smiles(read_smiles)
 
     def run(self, force: bool = False) -> None:
         """
@@ -106,11 +118,7 @@ class Trialblazer(object):
             self.import_smiles_file(force=force)
             self.load_model()
             self.preprocess()
-            result_with_score, closest_distance = self.run_model()
-            self.result = dict(
-                with_score=result_with_score,
-                closest_distance=closest_distance,
-            )
+            self.run_model()
 
     def get_dataframe(self) -> pd.DataFrame:
         """
@@ -121,7 +129,10 @@ class Trialblazer(object):
                 "No result in Trialblazer object: Run the model first with the run() method"
             )
         else:
-            df = self.result
+            df = self.result.copy()
+
+            PandasTools.AddMoleculeColumnToFrame(df, smilesCol="smi", molCol="mol")
+            # df["ROMol"] = df["SMILES"].apply(Chem.MolFromSmiles)
             return df
 
     def write(self, output_file: str = "trialblazer_output.csv") -> None:
@@ -133,8 +144,7 @@ class Trialblazer(object):
                 "No result in Trialblazer object: Run the model first with the run() method"
             )
         else:
-            with open(output_file, "w") as f:
-                f.write(str(self.result))
+            self.result.to_csv(output_file, index=False)
 
     def run_model(self):
         """
@@ -144,7 +154,7 @@ class Trialblazer(object):
             raise IOError(
                 "No model data in Trialblazer object: Load the model first with the load_model() method"
             )
-        return models.trialblazer_func(
+        self.result = models.trialblazer_func(
             classifier=self.classifier,
             selector=self.selector,
             test_set=self.test_set,
@@ -155,11 +165,140 @@ class Trialblazer(object):
             training_set=self.model_data["training_target_features"],
         )
 
-    def preprocess(self):
+    def preprocess(self, out_folder=None):
         """
         Preprocess the input data
         """
-        pass
+        if out_folder is None:
+            out_folder_obj = (
+                tempfile.TemporaryDirectory()
+            )  # os.path.join(test_folder_data, "..", "temp")
+            out_folder = out_folder_obj.name
+
+        temp_folder = tempfile.TemporaryDirectory()
+        temp_folder2 = tempfile.TemporaryDirectory()
+        """Step 1, preprocess compounds"""
+        # refinedInputFile = "/data/local/Druglikness_prediction/external_test_set/approved_testset_final_withname.csv"
+
+        # refinedInputFile = self.input_file
+        # refinedInputFile =
+        moleculeCsv = self.smiles
+
+        refinedOutputFolder = Path(out_folder)
+        preprocess(
+            moleculeCsv, refinedOutputFolder
+        )  # input: a dataframe with SMILES and ID, outpyut: a folder with the preprocessed files
+        CheckOutputResult(
+            refinedOutputFolder
+        )  # generate a csv file from log to check the output result
+
+        """Step 2, separate multicomponents"""
+        DB_processedDir = Path(out_folder) / "preprocessedSmiles"
+        # the folder generated from step 1
+        separate_multicomponents_test(
+            DB_processedDir
+        )  # input: a folder with the preprocessed files, output: a folder with the separated multicomponents, for this step, I modified the script from anya
+
+        """Step 3, remove duplicates"""
+        refinedInputFolder = Path(out_folder) / "separate_multicom_GetMolFrags"
+        # the folder generated from step 2
+        refinedOutputFolder = refinedInputFolder.parent / "uniqueSmiles"
+        if not refinedOutputFolder.exists():
+            refinedOutputFolder.mkdir()
+        remove_duplicate_splitted_files(
+            refinedInputFolder, refinedOutputFolder, "approved_testset_final"
+        )  # input: a folder with the separated multicomponents, output: a folder with the unique smiles files
+
+        """Step 4, combine the unique smiles files, this step I haven't made it into a function"""
+        unique_smiles_path = Path(out_folder) / "uniqueSmiles"
+
+        df_list = []
+        for filenames in os.listdir(unique_smiles_path):
+            print(filenames)
+            file = unique_smiles_path / filenames
+            df = pd.read_csv(file, sep="\t", index_col=None, header=0)
+            df_list.append(df)
+        preprocessed_df = pd.concat(df_list, axis=0, ignore_index=True)
+
+        """Step 5, remove stereochemical information from the preprocessed SMILES and filter the compounds to retain only small molecules"""
+        preprocessed_df["Molecule"] = preprocessed_df["preprocessedSmiles"].apply(
+            Chem.MolFromSmiles
+        )
+        preprocessed_df["SmilesForDropDu"] = preprocessed_df["Molecule"].apply(
+            Chem.MolToSmiles, isomericSmiles=False
+        )
+        preprocessed_df["Molecule"] = preprocessed_df["SmilesForDropDu"].apply(
+            Chem.MolFromSmiles
+        )
+        preprocessed_df["mw"] = preprocessed_df.Molecule.apply(
+            lambda mol: round(Descriptors.MolWt(mol), 3)
+        )
+        preprocessed_df_mw = preprocessed_df[preprocessed_df["mw"].between(150, 850)]
+
+        """Step 7, calculate and process the Tanimoto similarity results, the query data is the preprocessed data from step 1-5, the output of this step is the target feature"""
+        # load the preprocessed active and inactive targets from the ChEMBL database,
+        # these targets are preprocessed through Step 1-5, but in the application it is not necessary to calculate it from the scratch
+        output_path_temp_save_testdata_active = (
+            temp_folder  # create a folder to save temporary files for the test data
+        )
+        output_path_temp_save_testdata_inactive = (
+            temp_folder2  # create a folder to save temporary files for the test data
+        )
+
+        model_data = self.model_data
+        (
+            testset_active_binarize_list,
+            testset_active_binarized_target_remain,
+        ) = process_target_features(
+            output_path_temp_save=output_path_temp_save_testdata_active,
+            training_target_list=model_data[
+                "training_target_list"
+            ],  # only need to used the same targets as the training data
+            fpe=model_data["active_fpe"],
+            preprocessed_target_unique_smiles=model_data[
+                "active_preprocessed_target_unique_smiles"
+            ],
+            query_data=preprocessed_df_mw,
+        )
+
+        (
+            testset_inactive_binarize_list,
+            testset_inactive_binarized_target_remain,
+        ) = process_target_features(
+            output_path_temp_save=output_path_temp_save_testdata_inactive,
+            training_target_list=model_data[
+                "training_target_list"
+            ],  # only need to used the same targets as the training data
+            fpe=model_data["inactive_fpe"],
+            preprocessed_target_unique_smiles=model_data[
+                "inactive_preprocessed_target_unique_smiles"
+            ],
+            query_data=preprocessed_df_mw,
+        )
+        testset_filtered_targets, testset_target_list = remove_tested_inactive_targets(
+            testset_inactive_binarized_target_remain,
+            testset_active_binarized_target_remain,
+        )  # testset_filtered_targets is the target features I need for testset compounds
+
+        testset_filtered_targets_id = testset_filtered_targets.merge(
+            preprocessed_df_mw[["SmilesForDropDu", "id"]],
+            how="left",
+            on="SmilesForDropDu",
+        )
+
+        """Step 8, calculate Morgan2 fingerprints for the training and test data"""
+        morgan_cols = [f"morgan2_b{i}" for i in range(self.morgan_n_bits)]
+        testset_filtered_targets_id = add_morgan_fingerprints(
+            testset_filtered_targets_id, morgan_cols
+        )
+
+        """Final step, employ the model"""
+        # The input of Trialblazer is a dataframe of training featrues and the binary label of each compound, and the test set,
+        # the output including a dataframe with the PrOCTOR socre and prediction results for each compound in test set, and the cloestest similairty between test compounds and training compounds
+        test_set = testset_filtered_targets_id
+        # M2FPs_PBFPs = morgan_cols + model_data["training_target_list"]
+
+        self.test_set = test_set
 
     def load_model(self, model_folder=None):
         """
@@ -248,12 +387,30 @@ class Trialblazer(object):
         self.train_model()
 
     def save_classifier(self):
-        pass
+        classifier_path = Path(self.model_folder) / "classifier.pkl"
+        selector_path = Path(self.model_folder) / "selector.pkl"
+        if not os.path.exists(classifier_path):
+            with open(classifier_path, "wb") as f:
+                pickle.dump(self.classifier, file=f)
+        if not os.path.exists(selector_path):
+            with open(selector_path, "wb") as f:
+                pickle.dump(self.selector, file=f)
+
+    def load_classifier(self):
+        classifier_path = Path(self.model_folder) / "classifier.pkl"
+        selector_path = Path(self.model_folder) / "selector.pkl"
+        with open(classifier_path, "rb") as f:
+            self.classifier = pickle.load(f)
+        with open(selector_path, "rb") as f:
+            self.selector = pickle.load(f)
 
     def train_model(self, force=False, save=True):
         """
         Train the model if the file is not available
         """
+        classifier_path = Path(self.model_folder) / "classifier.pkl"
+        if os.path.exists(classifier_path):
+            self.load_classifier()
 
         if not hasattr(self, "classifier") or force:
             self.classifier, self.selector = models.trialblazer_train(

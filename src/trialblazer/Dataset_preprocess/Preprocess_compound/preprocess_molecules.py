@@ -26,7 +26,7 @@ def preprocess_database(file):
             listOfSmiles,
         )
     )
-    print("the molecylesProcessed genrated")
+    print("the moleculesProcessed generated")
     # set c++ log level of rdkit temporarily to ERROR so that csp does not clutter
     # stdout with logging
     rdLogger.setLevel(RDLogger.ERROR)
@@ -49,8 +49,11 @@ def preprocess_database(file):
 
     print(f"{file} successfully tautomerized.")
 
+    logdir = Path(file).parent.parent / "log"
+    if not logdir.exists():
+        logdir.mkdir()
     logFileName = fileName + ".log"
-    logFilepath = Path(file).parent.parent / "log" / logFileName
+    logFilepath = logdir / logFileName
     moleculesProcessed.write_log_file(logFilepath)
 
     # (rawSmiles, preprocessedSmiles, tautomerizedSmiles, ID)

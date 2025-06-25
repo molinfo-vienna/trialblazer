@@ -1,19 +1,33 @@
 import multiprocessing as mp
 import os
+import hashlib
+import base64
 import pandas as pd
 from .preprocess_molecules import preprocess_database
 from .split_files import split_large_files
 
 
-def get_data_from_DB(inputFile, reformatedFile):
+# def get_data_from_DB(inputFile, reformatedFile):
+# smilesDict = dict()
+# with open(inputFile, encoding="utf-8") as FoodDBFile:
+#     moleculeCsv = pd.read_csv(FoodDBFile, delimiter=None)
+def get_data_from_DB(moleculeCsv, reformatedFile):
     smilesDict = dict()
+    smiles = moleculeCsv["SMILES"]
+    moleculeCsv["hash_id"] = moleculeCsv["SMILES"].apply(
+        lambda x: base64.urlsafe_b64encode(hashlib.md5(x.encode("utf8")).digest())
+        .decode()
+        .strip()
+        .strip("=")
+    )
+    if "chembl_id" in moleculeCsv.keys():
+        ID = moleculeCsv["chembl_id"]
+    else:
+        moleculeCsv["chembl_id"] = None
+        ID = moleculeCsv["hash_id"]
+    smilesDict = {smiles: ID for smiles, ID in zip(smiles, ID)}
     with open(reformatedFile, "w", encoding="utf-8") as f:
-        with open(inputFile, encoding="utf-8") as FoodDBFile:
-            moleculeCsv = pd.read_csv(FoodDBFile, delimiter=None)
-            smiles = moleculeCsv["SMILES"]
-            ID = moleculeCsv["chembl_id"]
-            smilesDict = {smiles: ID for smiles, ID in zip(smiles, ID)}
-            pd.DataFrame.from_dict(smilesDict, orient="index").to_csv(f)
+        pd.DataFrame.from_dict(smilesDict, orient="index").to_csv(f)
     return smilesDict
 
 
@@ -25,16 +39,20 @@ def get_molecule_dict_as_smi_output(smilesDict, outputFile):
                 of.write(f"{smiles} {ID}\n")
 
 
-def preprocess(inputFile, outputFolder):
+def preprocess(moleculeCsv, outputFolder):
+    # def preprocess(inputFile, outputFolder):
     if not outputFolder.exists():
         outputFolder.mkdir()
 
     reformatedFolder = outputFolder / "smiles_reformat"
     if not reformatedFolder.exists():
         reformatedFolder.mkdir()
-    reformatedName = inputFile.split("/")[-1].split(".")[0] + ".smi"
+    reformatedName = "trialblazer_smiles.smi"
+    # reformatedName = inputFile.split("/")[-1].split(".")[0] + ".smi"
     reformatedFile = reformatedFolder / reformatedName
-    smilesDict = get_data_from_DB(inputFile, reformatedFile)
+
+    smilesDict = get_data_from_DB(moleculeCsv, reformatedFile)
+    # smilesDict = get_data_from_DB(inputFile, reformatedFile)
     get_molecule_dict_as_smi_output(smilesDict, reformatedFile)
 
     # Split it into multiple files
@@ -46,16 +64,13 @@ def preprocess(inputFile, outputFolder):
 
     # structure preprocess
     preprocessedDir = outputFolder / "preprocessedSmiles"
-    logdir = outputFolder / "log"
     if not preprocessedDir.exists():
         preprocessedDir.mkdir()
-    if not logdir.exists():
-        logdir.mkdir()
 
     databaseFilesJobList = []
-    for file in os.listdir(splitFolder):
-        databaseFilesJobList.append(os.path.join(splitFolder, file))
-    pool = mp.Pool(processes=mp.cpu_count() - 1)
+    for subfile in os.listdir(splitFolder):
+        databaseFilesJobList.append(os.path.join(splitFolder, subfile))
+    pool = mp.Pool(processes=max(1, mp.cpu_count() - 1))
     pool.map(preprocess_database, databaseFilesJobList)
     pool.close()
     pool.join()
@@ -63,6 +78,8 @@ def preprocess(inputFile, outputFolder):
 
 def CheckOutputResult(outputFolder):
     logdir = outputFolder / "log"
+    if not logdir.exists():
+        logdir.mkdir()
     CheckErrorFile = outputFolder / "error.csv"
     for filename in os.listdir(logdir):
         if filename.endswith(".log"):
