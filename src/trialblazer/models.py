@@ -432,7 +432,7 @@ def trialblazer_func(
     training_fpe,
     training_set,
     features,
-    unsure_if_toxic=True,
+    remove_MultiComponent_cpd=True,
 ):
     X_columns = features
     test_set_aligned = test_set.reindex(columns=X_columns, fill_value=0)
@@ -458,7 +458,7 @@ def trialblazer_func(
     predict_result_sim["PrOCTOR_score"] = predict_result_sim["PrOCTOR_score"].astype(
         float,
     )
-    if unsure_if_toxic:
+    if remove_MultiComponent_cpd:
         predict_result_sim_remove_multi = predict_result_sim[
             ~predict_result_sim["id"].str.contains(r"\d+x\d+")
         ]  # Remove multi-component drugs if the toxicity of the compounds is uncertain
@@ -509,7 +509,7 @@ def Trialblazer(
     threshold,
     k,
     training_fpe,
-    unsure_if_toxic=True,
+    remove_MultiComponent_cpd=True,
     classifier=None,
     selector=None,
 ):
@@ -523,7 +523,7 @@ def Trialblazer(
         test_set=test_set,
         threshold=threshold,
         training_fpe=training_fpe,
-        unsure_if_toxic=unsure_if_toxic,
+        remove_MultiComponent_cpd=remove_MultiComponent_cpd,
         features=features,
         training_set=training_set,
     )

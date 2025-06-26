@@ -14,7 +14,7 @@ from pathlib import Path
 import pandas as pd
 import pickle
 import ast
-from . import models
+from .models import trialblazer_func, trialblazer_train
 import tempfile
 
 # these three functions are in folder Dataset_preprocess/Preprocess_compound
@@ -54,7 +54,7 @@ class Trialblazer(object):
         model_folder: None | str = None,
         threshold: float = 0.06264154114736771,
         k: int = 900,
-        unsure_if_toxic: bool = False,
+        remove_MultiComponent_cpd: bool = True,
         # features: None | list[str] = None,
         morgan_n_bits: int = 2048,
     ) -> None:
@@ -64,7 +64,7 @@ class Trialblazer(object):
         self.input_file = input_file
         self.k = k
         self.threshold = threshold
-        self.unsure_if_toxic = unsure_if_toxic
+        self.remove_MultiComponent_cpd = remove_MultiComponent_cpd
         # self.features = features if features is not None else []
         self.morgan_n_bits = morgan_n_bits
         if model_folder is None:
@@ -135,7 +135,9 @@ class Trialblazer(object):
             # df["ROMol"] = df["SMILES"].apply(Chem.MolFromSmiles)
             return df
 
-    def write(self, output_file: str = "trialblazer_output.csv") -> None:
+    def write(
+        self, output_file: str = "trialblazer_output.csv", delimiter: str = "|"
+    ) -> None:
         """
         Write to file
         """
@@ -144,7 +146,7 @@ class Trialblazer(object):
                 "No result in Trialblazer object: Run the model first with the run() method"
             )
         else:
-            self.result.to_csv(output_file, index=False)
+            self.result.to_csv(output_file, index=False, delimiter=delimiter)
 
     def run_model(self):
         """
@@ -154,13 +156,13 @@ class Trialblazer(object):
             raise IOError(
                 "No model data in Trialblazer object: Load the model first with the load_model() method"
             )
-        self.result = models.trialblazer_func(
+        self.result = trialblazer_func(
             classifier=self.classifier,
             selector=self.selector,
             test_set=self.test_set,
             threshold=self.threshold,
             training_fpe=self.model_data["training_data_fpe"],
-            unsure_if_toxic=self.unsure_if_toxic,
+            remove_MultiComponent_cpd=self.remove_MultiComponent_cpd,
             features=self.model_data["features"],
             training_set=self.model_data["training_target_features"],
         )
@@ -413,7 +415,7 @@ class Trialblazer(object):
             self.load_classifier()
 
         if not hasattr(self, "classifier") or force:
-            self.classifier, self.selector = models.trialblazer_train(
+            self.classifier, self.selector = trialblazer_train(
                 training_set=self.model_data["training_target_features"],
                 y=self.model_data["y"],
                 features=self.model_data["features"],

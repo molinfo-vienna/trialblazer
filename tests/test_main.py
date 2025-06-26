@@ -1,8 +1,19 @@
 import os
 import pandas as pd
+import trialblazer
+import os
+import numpy as np
+from trialblazer import Trialblazer
 
+base_model_folder = os.path.join(
+    os.path.dirname(trialblazer.__file__),
+    "data",
+    "base_model",
+)
+
+input_file = os.path.join(os.path.dirname(__file__), "data", "test_input.csv")
 input_data = pd.read_csv(
-    os.path.join(os.path.dirname(__file__), "data", "test_input.csv"),
+    input_file,
     delimiter="|",
 )
 output_data = pd.read_csv(
@@ -10,6 +21,35 @@ output_data = pd.read_csv(
     delimiter="|",
 )
 
+output_data["id"] = output_data["chembl_id"]
+output_data = output_data[["id", "pred_prob_positive", "PrOCTOR_score"]]
+output_rm = output_data[~output_data["id"].str.contains(r"\d+x\d+")]
 
-def test_run():
-    output_data == output_data
+output_data = output_data.set_index("id")
+output_data.sort_index(inplace=True)
+output_rm = output_rm.set_index("id")
+output_rm.sort_index(inplace=True)
+
+
+def test_run(tmpdir):
+    tb = Trialblazer(input_file=input_file)
+    tb.run()
+    tb.write(output_file=os.path.join(tmpdir, "trialblazer.csv"))
+    df = tb.result.copy()
+    df = df[["id", "pred_prob_positive", "PrOCTOR_score"]]
+    df = df.set_index("id")
+    df.sort_index(inplace=True)
+    assert len(df.index) == len(output_rm.index)
+    assert np.isclose(df, output_rm).all()
+
+
+def test_run_no_remove(tmpdir):
+    tb = Trialblazer(input_file=input_file, remove_MultiComponent_cpd=False)
+    tb.run()
+    tb.write(output_file=os.path.join(tmpdir, "trialblazer.csv"))
+    df = tb.result.copy()
+    df = df[["id", "pred_prob_positive", "PrOCTOR_score"]]
+    df = df.set_index("id")
+    df.sort_index(inplace=True)
+    assert len(df.index) == len(output_data.index)
+    assert np.isclose(df, output_data).all()
