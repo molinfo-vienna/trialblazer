@@ -52,8 +52,9 @@ class Trialblazer(object):
         self,
         input_file: None | str = None,
         model_folder: None | str = None,
-        threshold: float = 0.06264154114736771,
-        k: int = 900,
+        M2FP_only: bool = False,
+        threshold: float | None = None,
+        k: int | None = None,
         remove_MultiComponent_cpd: bool = True,
         # features: None | list[str] = None,
         morgan_n_bits: int = 2048,
@@ -73,6 +74,19 @@ class Trialblazer(object):
             )
         else:
             self.model_folder = model_folder
+        self.M2FP_only = M2FP_only
+        if threshold is not None:
+            self.threshold = threshold
+        elif M2FP_only:
+            self.threshold = 0.10338700489734302
+        else:
+            self.threshold = 0.06264154114736771
+        if k is not None:
+            self.k = k
+        elif M2FP_only:
+            self.k = 800
+        else:
+            self.k = 900
 
     def import_smiles(self, smiles: list[str] = []) -> None:
         """
@@ -136,7 +150,7 @@ class Trialblazer(object):
             return df
 
     def write(
-        self, output_file: str = "trialblazer_output.csv", delimiter: str = "|"
+        self, output_file: str = "trialblazer_output.csv", sep: str = "|"
     ) -> None:
         """
         Write to file
@@ -146,7 +160,7 @@ class Trialblazer(object):
                 "No result in Trialblazer object: Run the model first with the run() method"
             )
         else:
-            self.result.to_csv(output_file, index=False, delimiter=delimiter)
+            self.result.to_csv(output_file, index=False, sep=sep)
 
     def run_model(self):
         """
@@ -376,7 +390,10 @@ class Trialblazer(object):
         model_data["active_fpe"] = active_fpe
         model_data["inactive_fpe"] = inactive_fpe
         model_data["training_target_list"] = training_target_list
-        model_data["features"] = morgan_cols + training_target_list
+        if self.M2FP_only:
+            model_data["features"] = morgan_cols
+        else:
+            model_data["features"] = morgan_cols + training_target_list
         model_data["training_data_fpe"] = training_data_fpe
         model_data[
             "inactive_preprocessed_target_unique_smiles"
