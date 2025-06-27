@@ -319,12 +319,15 @@ class Trialblazer(object):
         test_set = testset_filtered_targets_id
         return test_set
 
-    def prepare_testset(self, out_foler=None):
-        preprocessed_df = self.preprocess(
-            moleculeCsv=self.smiles, out_folder=out_folder
-        )
-        test_set = self.apply_tanimoto(preprocessed_df=preprocessed_df)
-        self.test_set = test_set
+    def prepare_testset(self, out_folder=None, force=False):
+        if not hasattr(self, "test_set") or force:
+            preprocessed_df = self.preprocess(
+                moleculeCsv=self.smiles, out_folder=out_folder
+            )
+            test_set = self.apply_tanimoto(preprocessed_df=preprocessed_df)
+            self.test_set = test_set
+        else:
+            print("Attribute test_set already exists, skipping preparation")
 
     def load_model(self, model_folder=None):
         """
