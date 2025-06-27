@@ -131,7 +131,7 @@ class Trialblazer(object):
         if not hasattr(self, "result") or force:
             self.import_smiles_file(force=force)
             self.load_model()
-            self.preprocess()
+            self.prepare_testset()
             self.run_model()
 
     def get_dataframe(self) -> pd.DataFrame:
@@ -160,7 +160,9 @@ class Trialblazer(object):
                 "No result in Trialblazer object: Run the model first with the run() method"
             )
         else:
-            self.result.to_csv(output_file, index=False, sep=sep)
+            self.result.set_index("id").sort_index().to_csv(
+                output_file, index=True, sep=sep
+            )
 
     def run_model(self):
         """
@@ -181,7 +183,8 @@ class Trialblazer(object):
             training_set=self.model_data["training_target_features"],
         )
 
-    def preprocess(self, out_folder=None):
+    @classmethod
+    def preprocess(cls, moleculeCsv, out_folder=None):
         """
         Preprocess the input data
         """
@@ -191,14 +194,11 @@ class Trialblazer(object):
             )  # os.path.join(test_folder_data, "..", "temp")
             out_folder = out_folder_obj.name
 
-        temp_folder = tempfile.TemporaryDirectory()
-        temp_folder2 = tempfile.TemporaryDirectory()
         """Step 1, preprocess compounds"""
         # refinedInputFile = "/data/local/Druglikness_prediction/external_test_set/approved_testset_final_withname.csv"
 
         # refinedInputFile = self.input_file
         # refinedInputFile =
-        moleculeCsv = self.smiles
 
         refinedOutputFolder = Path(out_folder)
         preprocess(
@@ -250,10 +250,15 @@ class Trialblazer(object):
             lambda mol: round(Descriptors.MolWt(mol), 3)
         )
         preprocessed_df_mw = preprocessed_df[preprocessed_df["mw"].between(150, 850)]
+        return preprocessed_df_mw
 
+    def apply_tanimoto(self, preprocessed_df):
         """Step 7, calculate and process the Tanimoto similarity results, the query data is the preprocessed data from step 1-5, the output of this step is the target feature"""
         # load the preprocessed active and inactive targets from the ChEMBL database,
         # these targets are preprocessed through Step 1-5, but in the application it is not necessary to calculate it from the scratch
+
+        temp_folder = tempfile.TemporaryDirectory()
+        temp_folder2 = tempfile.TemporaryDirectory()
         output_path_temp_save_testdata_active = (
             temp_folder  # create a folder to save temporary files for the test data
         )
@@ -274,7 +279,7 @@ class Trialblazer(object):
             preprocessed_target_unique_smiles=model_data[
                 "active_preprocessed_target_unique_smiles"
             ],
-            query_data=preprocessed_df_mw,
+            query_data=preprocessed_df,
         )
 
         (
@@ -289,7 +294,7 @@ class Trialblazer(object):
             preprocessed_target_unique_smiles=model_data[
                 "inactive_preprocessed_target_unique_smiles"
             ],
-            query_data=preprocessed_df_mw,
+            query_data=preprocessed_df,
         )
         testset_filtered_targets, testset_target_list = remove_tested_inactive_targets(
             testset_inactive_binarized_target_remain,
@@ -297,7 +302,7 @@ class Trialblazer(object):
         )  # testset_filtered_targets is the target features I need for testset compounds
 
         testset_filtered_targets_id = testset_filtered_targets.merge(
-            preprocessed_df_mw[["SmilesForDropDu", "id"]],
+            preprocessed_df[["SmilesForDropDu", "id"]],
             how="left",
             on="SmilesForDropDu",
         )
@@ -312,8 +317,13 @@ class Trialblazer(object):
         # The input of Trialblazer is a dataframe of training featrues and the binary label of each compound, and the test set,
         # the output including a dataframe with the PrOCTOR socre and prediction results for each compound in test set, and the cloestest similairty between test compounds and training compounds
         test_set = testset_filtered_targets_id
-        # M2FPs_PBFPs = morgan_cols + model_data["training_target_list"]
+        return test_set
 
+    def prepare_testset(self, out_foler=None):
+        preprocessed_df = self.preprocess(
+            moleculeCsv=self.smiles, out_folder=out_folder
+        )
+        test_set = self.apply_tanimoto(preprocessed_df=preprocessed_df)
         self.test_set = test_set
 
     def load_model(self, model_folder=None):

@@ -9,3 +9,4 @@ __email__ = "huanni.zhang@univie.ac.at"
 __version__ = "0.1.0"
 
 from .trialblazer import Trialblazer
+from .trialtrainer import TrialTrainer

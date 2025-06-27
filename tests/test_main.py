@@ -21,7 +21,6 @@ output_data = pd.read_csv(
     delimiter="|",
 )
 
-output_data["id"] = output_data["chembl_id"]
 output_data = output_data[["id", "pred_prob_positive", "PrOCTOR_score"]]
 output_rm = output_data[~output_data["id"].str.contains(r"\d+x\d+")]
 
