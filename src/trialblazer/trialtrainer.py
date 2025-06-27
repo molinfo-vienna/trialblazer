@@ -9,6 +9,8 @@ import pandas as pd
 import numpy as np
 from rdkit import Chem
 from rdkit.Chem.Descriptors import ExactMolWt
+from FPSim2 import FPSim2Engine
+from FPSim2.io import create_db_file
 
 from .trialblazer import Trialblazer
 
@@ -78,6 +80,7 @@ INNER JOIN (
         inactive_threshold=20000,
         active_threshold=10000,
         size_limit=None,
+        morgan_nbits=2048,
     ):
         self.chembl_version = chembl_version
         if chembl_folder is None:
@@ -106,6 +109,7 @@ INNER JOIN (
         self.inactive_threshold = inactive_threshold
         self.active_threshold = active_threshold
         self.size_limit = size_limit
+        self.morgan_nbits = morgan_nbits
 
     def chembl_download(self, version=None):
         """
@@ -161,11 +165,18 @@ INNER JOIN (
                         for f in tar.getnames():
                             print(f)
 
-    def process_activity(self):
-        with sqlite3.connect(
-            os.path.join(self.chembl_folder, f"chembl_{self.chembl_version}.sqlite")
-        ) as con:
-            df = pd.read_sql(self.chembl_query, con=con)
+    def process_activity(self, con=None):
+        if con is None:
+            with sqlite3.connect(
+                os.path.join(self.chembl_folder, f"chembl_{self.chembl_version}.sqlite")
+            ) as con:
+                df = pd.read_sql(self.chembl_query, con=con, chunksize=self.size_limit)
+                if self.size_limit is not None:
+                    df = next(df)
+        else:
+            df = pd.read_sql(self.chembl_query, con=con, chunksize=self.size_limit)
+            if self.size_limit is not None:
+                df = next(df)
         df = df.dropna()
         # remove stereochemistry information and using median activity value as representative activity value for the compounds
         df["mol"] = df["canonical_smiles"].apply(Chem.MolFromSmiles)
@@ -197,15 +208,43 @@ INNER JOIN (
         df_grouped_median_active = df_grouped_median[df_grouped_median.LABEL == 1]
         df_grouped_median_inactive = df_grouped_median[df_grouped_median.LABEL == 0]
 
-        # here the preprocess means the steps 1-5 in model Trialblazer (before calculate the Tanimoto similarity)
-        self.active_target_preprocessed = Trialblazer.preprocess(
-            moleculeCsv=df_grouped_median_active
+        # here the preprocess means the steps 1-5 in model Trialblazer
+        self.active_target_preprocessed = self.preprocess(df_grouped_median_active)
+        self.inactive_target_preprocessed = self.preprocess(df_grouped_median_inactive)
+
+    def write_target_preprocessed(self, output_folder=None, force=False):
+        if output_folder is None:
+            output_folder = os.path.join(
+                self.model_folder, "generated", "target_preprocessed"
+            )
+        if not os.path.exists(output_folder):
+            os.makedirs(output_folder)
+        filepath = os.path.join(output_folder, "active_target_preprocessed.csv")
+        if force or not os.path.exists(filepath):
+            self.active_target_preprocessed.to_csv(
+                filepath,
+                index=False,
+                sep="|",
+            )
+        filepath = os.path.join(output_folder, "inactive_target_preprocessed.csv")
+        if force or not os.path.exists(filepath):
+            self.inactive_target_preprocessed.to_csv(
+                filepath,
+                index=False,
+                sep="|",
+            )
+
+    def preprocess(self, moleculeCsv):
+        df = Trialblazer.preprocess(
+            moleculeCsv=moleculeCsv,
+            smiles_col="SMILES_withoutStereoChem",
+            id_col="target_id",
         )
-        self.inactive_target_preprocessed = Trialblazer.preprocess(
-            moleculeCsv=df_grouped_median_inactive
+        df = df[["SmilesForDropDu", "id"]].rename(
+            columns={"SmilesForDropDu": "SmilesWithoutStereo", "id": "target_id"}
         )
-        self.active_target_preprocessed.to_csv("active_blah.csv")
-        self.inactive_target_preprocessed.to_csv("inactive_blah.csv")
+        df["target_id"] = df["target_id"].apply(lambda x: [x])
+        return df
 
     def activity_filter(self, x):
         if x >= self.inactive_threshold:
@@ -214,3 +253,61 @@ INNER JOIN (
             return "active"
         else:
             return np.nan
+
+    def write_h5(self, smiles, filename, output_folder=None, force=False):
+        """
+        Writing h5 fingerprints database from FPSim2
+        """
+        if output_folder is None:
+            output_folder = os.path.join(self.model_folder, "generated", "fingerprints")
+        if not os.path.exists(output_folder):
+            os.makedirs(output_folder)
+        output_file = os.path.join(output_folder, filename)
+        if force or not os.path.exists(output_file):
+            smiles_gen = ((s, i) for i, s in enumerate(smiles))
+            create_db_file(
+                mols_source=smiles_gen,
+                filename=output_file,
+                mol_format="smiles",
+                fp_type="Morgan",
+                fp_params={"radius": 2, "fpSize": self.morgan_nbits},
+            )
+            print(f"Generated FP h5 file {os.path.basename(output_file)}")
+        else:
+            print(
+                f"FP h5 file {os.path.basename(output_file)} already exists, skipping"
+            )
+
+    def build_model_data(self, con=None, cleanup=True):
+        if con is None:
+            self.chembl_download()
+        self.process_activity(con=con)
+        self.write_target_preprocessed()
+        self.write_h5(
+            smiles=self.active_target_preprocessed["SmilesWithoutStereo"],
+            filename="active_fpe.h5",
+        )
+        self.write_h5(
+            smiles=self.inactive_target_preprocessed["SmilesWithoutStereo"],
+            filename="inactive_fpe.h5",
+        )
+        self.load_training_data()
+        self.write_h5(
+            smiles=self.training_data["SmilesForDropDu"],
+            filename="training_data_fpe.h5",
+        )
+        if cleanup:
+            self.cleanup()
+
+    def load_training_data(self):
+        if not hasattr(self, "training_data"):
+            self.training_data = pd.read_csv(self.training_set, sep="|")
+
+    def cleanup(self):
+        for a in (
+            "inactive_target_preprocessed",
+            "active_target_preprocessed",
+            "training_data",
+        ):
+            if hasattr(self, a):
+                delattr(self, a)

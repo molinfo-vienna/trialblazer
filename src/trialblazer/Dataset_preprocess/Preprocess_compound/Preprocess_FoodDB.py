@@ -11,16 +11,18 @@ from .split_files import split_large_files
 # smilesDict = dict()
 # with open(inputFile, encoding="utf-8") as FoodDBFile:
 #     moleculeCsv = pd.read_csv(FoodDBFile, delimiter=None)
-def get_data_from_DB(moleculeCsv, reformatedFile):
+def get_data_from_DB(moleculeCsv, reformatedFile, smiles_col="SMILES", id_col=None):
     smilesDict = dict()
-    smiles = moleculeCsv["SMILES"]
-    moleculeCsv["hash_id"] = moleculeCsv["SMILES"].apply(
+    smiles = moleculeCsv[smiles_col]
+    moleculeCsv["hash_id"] = moleculeCsv[smiles_col].apply(
         lambda x: base64.urlsafe_b64encode(hashlib.md5(x.encode("utf8")).digest())
         .decode()
         .strip()
         .strip("=")
     )
-    if "chembl_id" in moleculeCsv.keys():
+    if id_col is not None:
+        ID = moleculeCsv[id_col]
+    elif "chembl_id" in moleculeCsv.keys():
         ID = moleculeCsv["chembl_id"]
     else:
         moleculeCsv["chembl_id"] = None
@@ -39,7 +41,7 @@ def get_molecule_dict_as_smi_output(smilesDict, outputFile):
                 of.write(f"{smiles} {ID}\n")
 
 
-def preprocess(moleculeCsv, outputFolder):
+def preprocess(moleculeCsv, outputFolder, smiles_col="SMILES", id_col=None):
     # def preprocess(inputFile, outputFolder):
     if not outputFolder.exists():
         outputFolder.mkdir()
@@ -51,7 +53,9 @@ def preprocess(moleculeCsv, outputFolder):
     # reformatedName = inputFile.split("/")[-1].split(".")[0] + ".smi"
     reformatedFile = reformatedFolder / reformatedName
 
-    smilesDict = get_data_from_DB(moleculeCsv, reformatedFile)
+    smilesDict = get_data_from_DB(
+        moleculeCsv, reformatedFile, smiles_col=smiles_col, id_col=id_col
+    )
     # smilesDict = get_data_from_DB(inputFile, reformatedFile)
     get_molecule_dict_as_smi_output(smilesDict, reformatedFile)
 
