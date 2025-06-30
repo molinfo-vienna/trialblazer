@@ -402,7 +402,7 @@ class Trialblazer(object):
         )
 
         training_data_fpe = FPSim2Engine(
-            Path(model_folder) / "generated" / "fingerprints" / "training_data_fpe.pkl"
+            Path(model_folder) / "generated" / "fingerprints" / "training_data_fpe.h5"
         )
 
         # M2FPs_PBFPs = morgan_cols + training_target_list
