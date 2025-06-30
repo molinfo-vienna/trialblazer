@@ -55,6 +55,10 @@ jobs:
           python -m pip install --upgrade pip setuptools
           python -m pip install .
           python -m pip install .[dev,publishing]
+      - name: List installed package files
+        run: |
+          pip show trialblazer
+          find /opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/trialblazer
       - name: Run unit tests
         run: python -m pytest -v
       - name: Run CLI
