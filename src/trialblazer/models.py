@@ -2,6 +2,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+from rdkit.Chem import AllChem, Descriptors
+from rdkit.ML.Descriptors import MoleculeDescriptors
+from scipy.stats import bernoulli
 from sklearn import metrics
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import SelectKBest
@@ -17,6 +20,27 @@ from sklearn.metrics import recall_score
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import StratifiedKFold
 from sklearn.neural_network import MLPClassifier
+
+
+def get_morgan2(mol):
+    return list(AllChem.GetMorganFingerprintAsBitVect(mol,2,nBits=2048))
+
+
+def compute_2Drdkit(mol):
+    calc = MoleculeDescriptors.MolecularDescriptorCalculator([x[0] for x in Descriptors._descList])
+    ds = calc.CalcDescriptors(mol)
+    return list(ds)
+
+def MLP_simulation_test(X_new,y):
+    cv = StratifiedKFold(n_splits=10)
+    MCCs = []
+    for i, (train, test) in enumerate(cv.split(X_new, y)):
+        p_estimate = np.mean(y[train])
+        n_test_samples = len(X_new[test])
+        y_random = bernoulli.rvs(p_estimate, size=n_test_samples)
+        mcc = matthews_corrcoef(y[test],y_random)
+        MCCs.append(mcc)
+    return np.mean(MCCs)
 
 
 def MLP_decision_threshold_optimization(X, y, opt_num_feature):
