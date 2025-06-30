@@ -346,11 +346,17 @@ class Trialblazer(object):
         if model_folder is None:
             model_folder = self.model_folder
         inactive_preprocessed_target_unique_smiles = pd.read_csv(
-            Path(model_folder) / "inactive_target_preprocessed.csv",
+            Path(model_folder)
+            / "generated"
+            / "target_preprocessed"
+            / "inactive_target_preprocessed.csv",
             sep="|",
         )  # this preprocessed target smiles is precalculated by previous preprocessed steps base on chembl data, it doesn't need to be re-calculated.
         active_preprocessed_target_unique_smiles = pd.read_csv(
-            Path(model_folder) / "active_target_preprocessed.csv",
+            Path(model_folder)
+            / "generated"
+            / "target_preprocessed"
+            / "active_target_preprocessed.csv",
             sep="|",
         )  # this preprocessed target smiles is precalculated by previous preprocessed steps base on chembl data, it doesn't need to be re-calculated.
         active_preprocessed_target_unique_smiles[
