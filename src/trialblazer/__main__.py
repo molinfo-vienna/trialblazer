@@ -16,8 +16,8 @@ def main(input_file, output_file, model_folder):
 @click.command()
 @click.option("--url", help="ZIP Model URL", type=str, required=True)
 @click.option("--model_folder", help="Model Folder", default=None, type=str)
-def download(model_url, model_folder):
-    tb = Trialblazer(model_url=model_url, model_folder=model_folder)
+def download(url, model_folder):
+    tb = Trialblazer(model_url=url, model_folder=model_folder)
     tb.download_model()
 
 
