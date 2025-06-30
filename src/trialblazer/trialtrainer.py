@@ -166,6 +166,7 @@ INNER JOIN (
                             print(f)
 
     def process_activity(self, con=None):
+        print("Querying database")
         if con is None:
             with sqlite3.connect(
                 os.path.join(self.chembl_folder, f"chembl_{self.chembl_version}.sqlite")
@@ -177,6 +178,7 @@ INNER JOIN (
             df = pd.read_sql(self.chembl_query, con=con, chunksize=self.size_limit)
             if self.size_limit is not None:
                 df = next(df)
+        print("Starting preprocessing")
         df = df.dropna()
         # remove stereochemistry information and using median activity value as representative activity value for the compounds
         df["mol"] = df["canonical_smiles"].apply(Chem.MolFromSmiles)
@@ -209,7 +211,9 @@ INNER JOIN (
         df_grouped_median_inactive = df_grouped_median[df_grouped_median.LABEL == 0]
 
         # here the preprocess means the steps 1-5 in model Trialblazer
+        print("Preprocessing active targets")
         self.active_target_preprocessed = self.preprocess(df_grouped_median_active)
+        print("Preprocessing inactive targets")
         self.inactive_target_preprocessed = self.preprocess(df_grouped_median_inactive)
 
     def write_target_preprocessed(self, output_folder=None, force=False):
@@ -279,29 +283,65 @@ INNER JOIN (
             )
 
     def build_model_data(self, con=None, cleanup=True):
-        if con is None:
-            self.chembl_download()
-        self.process_activity(con=con)
-        self.write_target_preprocessed()
-        self.write_h5(
-            smiles=self.active_target_preprocessed["SmilesWithoutStereo"],
-            filename="active_fpe.h5",
+        preprocessed_folder = os.path.join(
+            self.model_folder, "generated", "preprocessed"
         )
-        self.write_h5(
-            smiles=self.inactive_target_preprocessed["SmilesWithoutStereo"],
-            filename="inactive_fpe.h5",
-        )
-        self.load_training_data()
-        self.write_h5(
-            smiles=self.training_data["SmilesForDropDu"],
-            filename="training_data_fpe.h5",
-        )
+        fpe_folder = os.path.join(self.model_folder, "generated", "fingerprints")
+        if not os.path.exists(
+            os.path.join(fpe_folder, "active_fpe.h5")
+        ) or not os.path.exists(os.path.join(fpe_folder, "inactive_fpe.h5")):
+            if os.path.exists(
+                os.path.join(preprocessed_folder, "active_target_preprocessed.csv")
+            ):
+                self.active_target_preprocessed = pd.read_csv(
+                    os.path.join(preprocessed_folder, "active_target_preprocessed.csv"),
+                    sep="|",
+                )
+            if os.path.exists(
+                os.path.join(preprocessed_folder, "inactive_target_preprocessed.csv")
+            ):
+                self.inactive_target_preprocessed = pd.read_csv(
+                    os.path.join(
+                        preprocessed_folder, "inactive_target_preprocessed.csv"
+                    ),
+                    sep="|",
+                )
+            if not hasattr(self, "active_target_preprocessed") or not hasattr(
+                self, "inactive_target_preprocessed"
+            ):
+                if con is None:
+                    self.chembl_download()
+                self.process_activity(con=con)
+                self.write_target_preprocessed()
+            else:
+                print("Files already present, skipping preprocessing")
+            self.write_h5(
+                smiles=self.active_target_preprocessed["SmilesWithoutStereo"],
+                filename="active_fpe.h5",
+            )
+            self.write_h5(
+                smiles=self.inactive_target_preprocessed["SmilesWithoutStereo"],
+                filename="inactive_fpe.h5",
+            )
+        else:
+            print(
+                "Fingerprints files for active/inactive targets already exist, skipping"
+            )
+        if not os.path.exists(os.path.join(fpe_folder, "training_data_fpe.h5")):
+            self.load_training_data()
+            self.write_h5(
+                smiles=self.training_data["SmilesForDropDu"],
+                filename="training_data_fpe.h5",
+            )
+
+        else:
+            print("Fingerprints files for training data already exist, skipping")
         if cleanup:
             self.cleanup()
 
-    def load_training_data(self):
+    def load_training_data(self, sep=","):
         if not hasattr(self, "training_data"):
-            self.training_data = pd.read_csv(self.training_set, sep="|")
+            self.training_data = pd.read_csv(self.training_set, sep=sep)
 
     def cleanup(self):
         for a in (
