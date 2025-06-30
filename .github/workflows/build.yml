@@ -24,24 +24,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Cache Download
-        id: cache-trialblazer
+        id: cache-trialblazer-base_model
         uses: actions/cache@v4
         with:
-          path: base_model_download.zip
+          path: ~/.trialblazer/models/base_model
           key: trialblazer-base-model
-      - name: Files download
-        if: steps.cache-trialblazer.outputs.cache-hit != 'true'
-        run: |
-          # git annex init
-          wget ${{ secrets.BASE_MODEL_DATA }} -O base_model_download.zip -nv
-      - name: Files unzip
-        run: |
-          unzip -d base_model_download base_model_download.zip
-          echo "Unzip done"
-          mv src/trialblazer/data/base_model src/trialblazer/data/base_model_old
-          mv base_model_download/base_model src/trialblazer/data/base_model
-          echo "Move done"
-          ls -alh src/trialblazer/data/base_model
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
@@ -56,10 +43,10 @@ jobs:
           python -m pip install --upgrade pip setuptools
           python -m pip install .
           python -m pip install .[dev,publishing]
-      - name: List installed package files
+      - name: Files download
+        if: steps.cache-trialblazer.outputs.cache-hit != 'true'
         run: |
-          pip show trialblazer
-          find /opt/hostedtoolcache/Python/3.12.11/x64/lib/python3.12/site-packages/trialblazer
+          trialblazer-download ${{ secrets.BASE_MODEL_DATA }}
       - name: Run unit tests
         run: python -m pytest -v
       - name: Run CLI

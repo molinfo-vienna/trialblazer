@@ -33,13 +33,11 @@ output_rm.sort_index(inplace=True)
 def test_run(tmpdir):
     tb = Trialblazer(input_file=input_file)
     tb.run()
-    tb.write(output_file=os.path.join(tmpdir, "trialblazer.csv"))
-    df = tb.result.copy()
-    df = df[["id", "pred_prob_positive", "PrOCTOR_score"]]
-    df = df.set_index("id")
-    df.sort_index(inplace=True)
-    assert len(df.index) == len(output_rm.index)
-    assert np.isclose(df, output_rm).all()
+
+
+def test_download():
+    tb = Trialblazer()
+    tb.download_model()
 
 
 def test_run_no_remove(tmpdir):

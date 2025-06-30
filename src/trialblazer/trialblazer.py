@@ -3,6 +3,8 @@ import pandas as pd
 import csv
 import os
 import re
+import requests
+import zipfile
 
 # Preprocess compounds
 import os
@@ -64,6 +66,7 @@ class Trialblazer(object):
         remove_MultiComponent_cpd: bool = True,
         # features: None | list[str] = None,
         morgan_n_bits: int = 2048,
+        model_url: str | None = None,
     ) -> None:
         """
         Create the triablazer object
@@ -76,7 +79,7 @@ class Trialblazer(object):
         self.morgan_n_bits = morgan_n_bits
         if model_folder is None:
             self.model_folder = os.path.join(
-                os.path.dirname(__file__), "data", "base_model"
+                os.environ["HOME"], ".trialblazer", "models", "base_model"
             )
         else:
             self.model_folder = model_folder
@@ -93,6 +96,7 @@ class Trialblazer(object):
             self.k = 800
         else:
             self.k = 900
+        self.model_url = model_url
 
     def import_smiles(self, smiles: list[str] = []) -> None:
         """
@@ -128,6 +132,58 @@ class Trialblazer(object):
                     self.smiles = pd.concat(self.smiles, smiles_df)
                 # read_smiles = smiles_df["SMILES"].to_list()
                 # self.import_smiles(read_smiles)
+
+    def download_model(self):
+        if not os.path.exists(self.model_folder):
+            os.makedirs(self.model_folder)
+        if not os.path.exists(
+            os.path.join(self.model_folder, "training_target_features.csv")
+        ):
+            if self.model_url is not None:
+                model_url = self.model_url
+            elif "TRIALBLAZER_URL" in os.environ:
+                model_url = os.environ["TRIALBLAZER_URL"]
+            else:
+                raise ValueError("No specified value for model_url, aborting download.")
+
+            print(f"Downloading from {model_url}...")
+            with tempfile.TemporaryDirectory() as tempdir:
+                with requests.get(model_url, stream=True) as response:
+                    response.raise_for_status()  # Raise an error for HTTP issues
+
+                    # Save the ZIP file to a temporary location
+                    zip_path = os.path.join(tempdir, "temp_model.zip")
+                    with open(zip_path, "wb") as temp_zip:
+                        for chunk in response.iter_content(chunk_size=1024 * 1024):
+                            if chunk:  # Filter out keep-alive chunks
+                                temp_zip.write(chunk)
+
+                # Extract the ZIP file
+                print("Extracting the ZIP file...")
+                with zipfile.ZipFile(zip_path, "r") as zip_file:
+                    # Get the top-level folder name
+                    top_level_folder = os.path.commonpath(zip_file.namelist())
+
+                    # Extract files without the top-level folder
+                    for member in zip_file.namelist():
+                        # Remove the top-level folder from the path
+                        member_path = os.path.relpath(member, top_level_folder)
+                        target_path = os.path.join(self.model_folder, member_path)
+
+                        # Skip directories (they will be created automatically)
+                        if member.endswith("/"):
+                            continue
+
+                        # Ensure the target directory exists
+                        os.makedirs(os.path.dirname(target_path), exist_ok=True)
+
+                        # Extract the file
+                        with zip_file.open(member) as source, open(
+                            target_path, "wb"
+                        ) as target:
+                            target.write(source.read())
+
+            print(f"Extraction complete. Files extracted to: {self.model_folder}")
 
     def run(self, force: bool = False) -> None:
         """
