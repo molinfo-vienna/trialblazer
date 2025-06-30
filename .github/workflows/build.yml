@@ -41,6 +41,7 @@ jobs:
           mv src/trialblazer/data/base_model src/trialblazer/data/base_model_old
           mv base_model_download/base_model src/trialblazer/data/base_model
           echo "Move done"
+          ls -alh src/trialblazer/data/base_model
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:
