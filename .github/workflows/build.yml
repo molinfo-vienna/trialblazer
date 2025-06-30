@@ -37,8 +37,10 @@ jobs:
       - name: Files unzip
         run: |
           unzip -d base_model_download base_model_download.zip
+          echo "Unzip done"
           mv src/trialblazer/data/base_model src/trialblazer/data/base_model_old
           mv base_model_download/base_model src/trialblazer/data/base_model
+          echo "Move done"
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
         with:

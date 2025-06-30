@@ -37,6 +37,7 @@ dependencies = [
 "acm_hamburg_legacy@git+https://github.com/molinfo-vienna/acm-hamburg-legacy.git",
 "chembl_structure_pipeline",
 "fpsim2",
+"cirpy",
 ]
 description = "A Chemistry-Focused Predictor of Toxicity Risks in Late-Stage Drug Development"
 keywords = ["chemoinformatics","scientific software","chemistry","drug discovery","toxicity"]
