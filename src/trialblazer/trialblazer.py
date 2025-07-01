@@ -59,14 +59,13 @@ class Trialblazer:
         remove_MultiComponent_cpd: bool = True,
         # features: None | list[str] = None,
         morgan_n_bits: int = 2048,
-        model_url: str | None = None,
+        model_url: str | None = "https://zenodo.org/records/15783346/files/precalculated_data_for_trialblazer_model.tar.gz?download=1",
     ) -> None:
         """Create the triablazer object."""
         self.input_file = input_file
         self.k = k
         self.threshold = threshold
         self.remove_MultiComponent_cpd = remove_MultiComponent_cpd
-        # self.features = features if features is not None else []
         self.morgan_n_bits = morgan_n_bits
         if model_folder is None:
             self.model_folder = os.path.join(
@@ -122,7 +121,7 @@ class Trialblazer:
                 # read_smiles = smiles_df["SMILES"].to_list()
                 # self.import_smiles(read_smiles)
 
-    def download_model(self) -> None:
+    def download_model(self,archive_type:str="tar.gz",top_folder:bool=False) -> None:
         if not os.path.exists(self.model_folder):
             os.makedirs(self.model_folder)
         if not os.path.exists(
@@ -140,37 +139,53 @@ class Trialblazer:
                 with requests.get(model_url, stream=True) as response:
                     response.raise_for_status()  # Raise an error for HTTP issues
 
-                    # Save the ZIP file to a temporary location
-                    zip_path = os.path.join(tempdir, "temp_model.zip")
-                    with open(zip_path, "wb") as temp_zip:
+                    # Save the archive file to a temporary location
+                    archive_path = os.path.join(tempdir, "temp_model.{archive_type}")
+                    with open(archive_path, "wb") as temp_archive:
                         for chunk in response.iter_content(chunk_size=1024 * 1024):
                             if chunk:  # Filter out keep-alive chunks
-                                temp_zip.write(chunk)
+                                temp_archive.write(chunk)
 
-                # Extract the ZIP file
-                with zipfile.ZipFile(zip_path, "r") as zip_file:
-                    # Get the top-level folder name
-                    top_level_folder = os.path.commonpath(zip_file.namelist())
+                if archive_type == 'zip':
+                    with zipfile.ZipFile(archive_path, "r") as zip_file:
+                        if top_folder:
+                            members = zip_file.namelist()
+                            top_level_folder = os.path.commonpath(members)
 
-                    # Extract files without the top-level folder
-                    for member in zip_file.namelist():
-                        # Remove the top-level folder from the path
-                        member_path = os.path.relpath(member, top_level_folder)
-                        target_path = os.path.join(self.model_folder, member_path)
+                            for member in members:
+                                if member.endswith("/"):
+                                    continue
+                                member_path = os.path.relpath(member, top_level_folder)
+                                target_path = os.path.join(self.model_folder, member_path)
 
-                        # Skip directories (they will be created automatically)
-                        if member.endswith("/"):
-                            continue
+                                os.makedirs(os.path.dirname(target_path), exist_ok=True)
 
-                        # Ensure the target directory exists
-                        os.makedirs(os.path.dirname(target_path), exist_ok=True)
+                                with zip_file.open(member) as source, open(target_path, "wb") as target:
+                                    target.write(source.read())
+                        else:
+                            zip_file.extractall(path=self.model_folder)
 
-                        # Extract the file
-                        with zip_file.open(member) as source, open(
-                            target_path, "wb",
-                        ) as target:
-                            target.write(source.read())
+                elif archive_type == 'tar.gz':
+                    with tarfile.open(archive_path, "r:gz") as tar:
+                        if top_folder:
+                            members = tar.getmembers()
+                            top_level_folder = os.path.commonpath([m.name for m in members])
 
+                            for member in members:
+                                member_path = os.path.relpath(member.name, top_level_folder)
+                                target_path = os.path.join(self.model_folder, member_path)
+
+                                if member.isdir():
+                                    os.makedirs(target_path, exist_ok=True)
+                                else:
+                                    os.makedirs(os.path.dirname(target_path), exist_ok=True)
+                                    with tar.extractfile(member) as source, open(target_path, "wb") as target:
+                                        target.write(source.read())
+                        else:
+                            tar.extractall(path=self.model_folder)
+
+                else:
+                    raise ValueError(f'Archive type not supported: {archive_type}')
 
     def run(self, force: bool = False) -> None:
         """Running model and storing results in self.result.

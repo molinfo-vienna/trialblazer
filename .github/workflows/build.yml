@@ -46,7 +46,7 @@ jobs:
       - name: Files download
         if: steps.cache-trialblazer.outputs.cache-hit != 'true'
         run: |
-          trialblazer-download --url=${{ secrets.BASE_MODEL_DATA }}
+          trialblazer-download
       - name: Run unit tests
         run: python -m pytest -v
       - name: Run CLI
