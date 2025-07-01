@@ -13,17 +13,94 @@
 | **Other best practices**           | &nbsp; |
 | Documentation                      | [![Documentation Status](https://readthedocs.org/projects/trialblazer/badge/?version=latest)](https://trialblazer.readthedocs.io/en/latest/?badge=latest) || **GitHub Actions**                 | &nbsp; |
 | Build                              | [![build](https://github.com/molinfo-vienna/trialblazer/actions/workflows/build.yml/badge.svg)](https://github.com/molinfo-vienna/trialblazer/actions/workflows/build.yml) |
+
 ## Data
+
 You can download the data, including training data, test set data with corresponding prediction results, and bioactivity data, from: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15484761.svg)](https://doi.org/10.5281/zenodo.15484761)
 
+To download the data automatically, see below the description of the Command Line Interface.
 
-## How to use trialblazer
+## How to use Trialblazer
 
 A Chemistry-Focused Predictor of Toxicity Risks in Late-Stage Drug Development
 
-The project setup is documented in [project_setup.md](project_setup.md). Feel free to remove this document (and/or the link to this document) if you don't need it.
+### Via Command Line
 
+Several commands are made available:
+
+
+#### Downloading the model
+```
+# Default model and default folder ($HOME/.trialblazer/models/base_model)
+trialblazer-download
+
+# Use other URL/folder
+trialblazer-download --url=<MODEL-URL> --model-folder=<FOLDER>
+```
+
+#### Running the algorithm
+
+The input data should be a CSV file with headers and a column named "SMILES". If present, the column "chembl_id" will also be used for the output.
+
+The command `trialblazer --help` outputs:
+
+```
+Options:
+  --input_file TEXT    Input File  [required]
+  --output_file TEXT   Output File
+  --model_folder TEXT  Model Folder
+  --help               Show this message and exit.
+```
+
+The default output file is names `trialblazer.csv`.
+
+### As a Python library
+
+The library containers 2 main classes:
+
+#### Trialblazer
+
+This class loads and runs the model.
+
+```
+from trialblazer import Trialblazer
+
+tb = Trialblazer(input_file=<INPUT_FILE>)
+tb.run()  # Includes loading of the model, creation of the classifier, and running the algorithm
+
+df = tb.get_dataframe() # This dataframe is augmented with RDKit Mol objects, and displaying it shows the visual representation of each molecule.
+
+tb.write(output_file=<OUTPUT_FILE>)
+```
+#### Trialtrainer
+
+This class is meant to preprocess training data to recreate a model from a single CSV file (`training_target_features.csv`). It downloads the Chembl database, extracts relevant info, preprocesses data for active and inactive targets, and creates fingerprints files for the 3 sets of molecules (training, active, inactive).
+
+Simply put your `training_target_features.csv` in your `MODEL_FOLDER` and run:
+
+```
+from trialblazer import Trialtrainer
+
+tt = Trialtrainer(model_folder=<MODEL_FOLDER>)
+tt.build_model_data()
+
+```
+
+Then you can run the algorithm using:
+
+```
+from trialblazer import Trialblazer
+
+tb = Trialblazer(input_file=<INPUT_FILE>, model_folder=<MODEL_FOLDER>)
+tb.run()  # Includes loading of the model, creation of the classifier, and running the algorithm
+
+```
 ## Installation
+
+To install via PyPI, simply run:
+```
+pip install trialblazer
+```
 
 To install trialblazer from GitHub repository, do:
 
@@ -33,9 +110,6 @@ cd trialblazer
 python -m pip install .
 ```
 
-## Documentation
-
-Include a link to your project's full documentation here.
 
 
 
