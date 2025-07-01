@@ -10,6 +10,7 @@ from pathlib import Path
 import pandas as pd
 import requests
 from FPSim2 import FPSim2Engine
+import tarfile
 
 # Preprocess compounds
 from rdkit import Chem
@@ -59,9 +60,9 @@ class Trialblazer:
         remove_MultiComponent_cpd: bool = True,
         # features: None | list[str] = None,
         morgan_n_bits: int = 2048,
-        model_url: str | None = "https://zenodo.org/records/15783346/files/precalculated_data_for_trialblazer_model.tar.gz?download=1",
+        model_url: str | None = "https://zenodo.org/records/15783346/files/precalculated_data_for_trialblazer_model.tar.gz",
         archive_type:str="tar.gz",
-        top_folder:bool=False,
+        top_folder:bool=True,
     ) -> None:
         """Create the triablazer object."""
         self.input_file = input_file
@@ -148,7 +149,7 @@ class Trialblazer:
                     response.raise_for_status()  # Raise an error for HTTP issues
 
                     # Save the archive file to a temporary location
-                    archive_path = os.path.join(tempdir, "temp_model.{archive_type}")
+                    archive_path = os.path.join(tempdir, f"temp_model.{archive_type}")
                     with open(archive_path, "wb") as temp_archive:
                         for chunk in response.iter_content(chunk_size=1024 * 1024):
                             if chunk:  # Filter out keep-alive chunks
@@ -157,7 +158,8 @@ class Trialblazer:
                 if archive_type == 'zip':
                     with zipfile.ZipFile(archive_path, "r") as zip_file:
                         if top_folder:
-                            members = zip_file.namelist()
+                            all_members = zip_file.namelist()
+                            members = [m for m in all_members if not m.startswith('.')]
                             top_level_folder = os.path.commonpath(members)
 
                             for member in members:
@@ -166,6 +168,7 @@ class Trialblazer:
                                 member_path = os.path.relpath(member, top_level_folder)
                                 target_path = os.path.join(self.model_folder, member_path)
 
+                                print(f'Installing {target_path}')
                                 os.makedirs(os.path.dirname(target_path), exist_ok=True)
 
                                 with zip_file.open(member) as source, open(target_path, "wb") as target:
@@ -176,12 +179,14 @@ class Trialblazer:
                 elif archive_type == 'tar.gz':
                     with tarfile.open(archive_path, "r:gz") as tar:
                         if top_folder:
-                            members = tar.getmembers()
+                            all_members = tar.getmembers()
+                            members = [m for m in all_members if not m.name.startswith('.')]
                             top_level_folder = os.path.commonpath([m.name for m in members])
 
                             for member in members:
                                 member_path = os.path.relpath(member.name, top_level_folder)
                                 target_path = os.path.join(self.model_folder, member_path)
+                                print(f'Installing {target_path}')
 
                                 if member.isdir():
                                     os.makedirs(target_path, exist_ok=True)
