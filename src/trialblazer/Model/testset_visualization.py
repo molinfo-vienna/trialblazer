@@ -5,14 +5,14 @@ import seaborn as sns
 from matplotlib import cm
 
 
-def plot_score_distribution_with_significance(data, p_values):
+def plot_score_distribution_with_significance(data, p_values) -> None:
     custom_palette = {
         "Benign compounds\nTraining set": "#ff7f00",
         "Toxic compounds\nTraining set": "#984ea3",
         "Benign compounds\nTest set": "orangered",
     }
     plt.figure(figsize=(6, 6))
-    ax = sns.violinplot(x="Category", y="Value", data=data, palette=custom_palette, inner="quartile")
+    sns.violinplot(x="Category", y="Value", data=data, palette=custom_palette, inner="quartile")
     y_max = data["Value"].max() + 0.5
     step = 5
     for i, ((cat1, cat2), p) in enumerate(p_values.items()):
@@ -26,7 +26,7 @@ def plot_score_distribution_with_significance(data, p_values):
     plt.ylabel("PrOCTOR Score")
     plt.show()
 
-def plot_correlation(predict_result_toxic, predict_result_benign):
+def plot_correlation(predict_result_toxic, predict_result_benign) -> None:
     plt.figure(figsize=(10, 6))
     all_logP = predict_result_toxic["logP"].tolist() + predict_result_benign["logP"].tolist()
     all_scores = predict_result_toxic["PrOCTOR_score"].tolist() + predict_result_benign["PrOCTOR_score"].tolist()
@@ -58,7 +58,7 @@ def plot_correlation(predict_result_toxic, predict_result_benign):
     plt.grid(True)
     plt.show()
 
-def SuspectedAdverseDrugEvents_count_for_eachdrug(prediction_combine):
+def SuspectedAdverseDrugEvents_count_for_eachdrug(prediction_combine) -> None:
     num_categories = len(prediction_combine.columns[3:])
     color_map = cm.get_cmap("tab20b", num_categories)
     colors = [mcolors.rgb2hex(color_map(i)) for i in range(num_categories)]
@@ -89,7 +89,7 @@ def SuspectedAdverseDrugEvents_count_for_eachdrug(prediction_combine):
     plt.tight_layout()
     plt.show()
 
-def SuspectedAdverseDrugEvents_count(pre_benign, pre_toxic, list_of_adverse_reaction):
+def SuspectedAdverseDrugEvents_count(pre_benign, pre_toxic, list_of_adverse_reaction) -> None:
     benign_not_serious_list_array, benign_serious_list_array = process_adverse_reactions(pre_benign, list_of_adverse_reaction)
     toxic_not_serious_list_array, toxic_serious_list_array = process_adverse_reactions(pre_toxic, list_of_adverse_reaction)
     category_counts_benign = {
@@ -132,7 +132,7 @@ def SuspectedAdverseDrugEvents_count(pre_benign, pre_toxic, list_of_adverse_reac
     ax.legend()
     plt.show()
 
-def SuspectedAdverseDrugEvents_Totalcount_for_eachdrug(prediction_combine):
+def SuspectedAdverseDrugEvents_Totalcount_for_eachdrug(prediction_combine) -> None:
     x_indexes = np.arange(len(prediction_combine["Drugs"]))
     fig, ax = plt.subplots(figsize=(12, 6))
     plt.bar(x_indexes, prediction_combine["Total"], color="orangered")

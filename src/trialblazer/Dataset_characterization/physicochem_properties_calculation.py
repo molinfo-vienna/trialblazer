@@ -11,13 +11,12 @@ adopted from the script using for ring systems project from Ya Chen's work: http
 """
 
 
-def get_physicochemical_properties(molDF, smiles_column):
+def get_physicochemical_properties(molDF, smiles_column) -> None:
     """Applies all property calculations to the ring systems of the dataframe and stores each property in a new column
     :param molDF: dataframe with ring systems as SMILES in the column 'ringSmiles'
-    :return: a dataframe with ring system molecules and their properties
+    :return: a dataframe with ring system molecules and their properties.
     """
     PandasTools.AddMoleculeColumnToFrame(molDF, smiles_column, "Molecule")
-    print("Start calculcating parameters.")
     molDF["N"] = molDF["Molecule"].apply(get_molecule_composition, args=(7,))
     molDF["O"] = molDF["Molecule"].apply(get_molecule_composition, args=(8,))
     molDF["chiral"] = molDF["Molecule"].apply(get_nof_chiral_centers)
@@ -39,11 +38,10 @@ def get_physicochemical_properties(molDF, smiles_column):
     molDF["frac_csp3"] = molDF["Molecule"].apply(fraction_csp3)
 
 
-def get_further_physicochemical_properties(molDF):
+def get_further_physicochemical_properties(molDF) -> None:
     """:param molDF: dataframe with ring systems as SMILES in the column 'ringSmiles'
     :return: a dataframe with ring system molecules and their properties
     """
-    print("Start calculcating further properties.")
     del molDF["bridgeheadAtoms"]
     molDF["S"] = molDF["Molecule"].apply(get_molecule_composition, args=(16,))
     molDF["nHalogens"] = molDF["Molecule"].apply(num_halogens)
@@ -54,7 +52,7 @@ def get_molecule_composition(mol, requestedAtomicNum):
     """Counts the number of atoms of a given element in the ring system
     :param mol: the ring system molecule
     :param requestedAtomicNum: atomic number of the element for which the occurrence should be counted
-    :return: the number of atoms of an element
+    :return: the number of atoms of an element.
     """
     counter = 0
     for atom in mol.GetAtoms():
@@ -120,6 +118,6 @@ def num_halogens(mol):
 def get_mr(mol):
     """Wildman-Crippen MR value
     Uses an atom-based scheme based on the values in the paper:
-    Wildman and G. M. Crippen JCICS 39 868-873 (1999)
+    Wildman and G. M. Crippen JCICS 39 868-873 (1999).
     """
     return round(Crippen.MolMR(mol), 3)

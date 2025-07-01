@@ -8,15 +8,15 @@ This script is used to remove duplicate molecules for coconut, zinc (datasets ha
 It will:
     - group by unique constitution (same connectivity) and have a constitution ID (conID).
     - within one group, remove smiles with fully undefined stereochemistry if there is a better defined smiles (only consider @ flags in smiles)
-    
+
 use after preprocessing, filter bad patterns.
 
 """
 
 
-def remove_duplicate_splitted_files(inputfolder, outputfolder, prefix):
+def remove_duplicate_splitted_files(inputfolder, outputfolder, prefix) -> None:
     """Use for a big file has been splitted in parts.
-    Need to put them together first and then split according to consititutions
+    Need to put them together first and then split according to consititutions.
     """
     li = []
     for filename in os.listdir(inputfolder):
@@ -25,13 +25,9 @@ def remove_duplicate_splitted_files(inputfolder, outputfolder, prefix):
         li.append(df)
 
     df = pd.concat(li, axis=0, ignore_index=True)
-    print(f"number of entries: {len(df)!s}")
     df = df[["preprocessedSmiles", "id", "tautomerizedSmiles"]]
 
     df = df[df["preprocessedSmiles"] != ""]
-    print(
-        f"number of entries after remove empty preprocessedSmiles: {len(df)!s}",
-    )
 
     # df.drop_duplicates(subset=['preprocessedSmiles'],inplace=True)
     # print('number of entries after drop duplicated preprocessedSmiles: {}'.format(str(len(df))))
@@ -40,8 +36,7 @@ def remove_duplicate_splitted_files(inputfolder, outputfolder, prefix):
     df["smiles_noStereo"] = df.apply(get_smiles_noStereo, axis=1)
     df["inchi_noStereo"] = df.apply(get_inchi_nostereo, axis=1)
 
-    df.drop_duplicates(subset=["inchi_noStereo"], inplace=True)
-    print(f"number of entries after drop duplicated inchi: {len(df)!s}")
+    df = df.drop_duplicates(subset=["inchi_noStereo"])
 
     df_noVariance, df_Variance = separate_by_if_stereo_variance(df)
 
@@ -58,11 +53,9 @@ def remove_duplicate_splitted_files(inputfolder, outputfolder, prefix):
             "inchi_noStereo",
         ]
     ].to_csv(outputFile1, sep="\t", index=False)
-    print(f"number of entries with no stereo Variance: {len(df_noVariance)!s}")
     del df_noVariance
 
-    variance = len(df_Variance)
-    print(f"number of entries with stereo Variance: {variance!s}")
+    len(df_Variance)
 
     outputfilename2 = prefix + "_Variance_uniq.csv"
     outputFile2 = outputfolder / outputfilename2
@@ -75,25 +68,22 @@ def remove_duplicate_splitted_files(inputfolder, outputfolder, prefix):
 
 def get_inchi_nostereo(row):
     smi = row["smiles_noStereo"]
-    inchi_nostereo = Chem.MolToInchi(Chem.MolFromSmiles(smi))
-    return inchi_nostereo
+    return Chem.MolToInchi(Chem.MolFromSmiles(smi))
 
 
 def get_smiles_noStereo(row):
     smi = row["preprocessedSmiles"]
-    smiles_noStereo = Chem.MolToSmiles(
+    return Chem.MolToSmiles(
         Chem.MolFromSmiles(smi),
         isomericSmiles=False,
     )
-    return smiles_noStereo
 
 
 def count_nFlags_smiles(row):
     # annotate how many chiral tags in the smiles
     smi = row["preprocessedSmiles"]
     smi = smi.replace("@@", "@")
-    nFlags = smi.count("@")
-    return nFlags
+    return smi.count("@")
 
 
 def separate_by_if_stereo_variance(df):
@@ -102,7 +92,7 @@ def separate_by_if_stereo_variance(df):
     frames = []
     frames_variance = []
     conID = 0
-    for name, group in df:
+    for _name, group in df:
         group.count().reset_index()
         conID += 1
         group["conID"] = (
@@ -128,13 +118,13 @@ def split_dataframe_by_groups_with_tautomerizedSmiles(
     df,
     outputFile,
     size=5000,
-):
-    """Use this to split a set to smaller parts"""
+) -> None:
+    """Use this to split a set to smaller parts."""
     df = df.groupby("smiles_noStereo")
 
     frames = []
     i = 0
-    for name, group in df:
+    for _name, group in df:
         group.count().reset_index()
         frames.append(group)
         if len(frames) % size == 0:
@@ -143,7 +133,6 @@ def split_dataframe_by_groups_with_tautomerizedSmiles(
                 pd.concat(frames),
             )
             outputFile3 = str(outputFile).split(".")[0] + "_part" + str(i) + ".csv"
-            print(f"writing down part {i!s} ......")
             results_df[
                 [
                     "preprocessedSmiles",
@@ -158,7 +147,6 @@ def split_dataframe_by_groups_with_tautomerizedSmiles(
     i += 1
     results_df = remove_smiles_fully_undefined_stereo(pd.concat(frames))
     outputFile3 = str(outputFile).split(".")[0] + "_part" + str(i) + ".csv"
-    print(f"writing down part {i!s} ......")
     results_df[
         [
             "preprocessedSmiles",
@@ -172,11 +160,11 @@ def split_dataframe_by_groups_with_tautomerizedSmiles(
 
 
 def remove_smiles_fully_undefined_stereo(df):
-    """Only when there is other smiles in this consititution"""
+    """Only when there is other smiles in this consititution."""
     df = df.groupby("smiles_noStereo")
 
     frames = []
-    for name, group in df:
+    for _name, group in df:
         group.count().reset_index()
         nums = set(group.nChiralFlags)
 
@@ -188,8 +176,7 @@ def remove_smiles_fully_undefined_stereo(df):
         new_group.count().reset_index()
         frames.append(new_group)
 
-    results_df = pd.concat(frames)
-    return results_df
+    return pd.concat(frames)
 
 
 if __name__ == "__main__":
@@ -228,4 +215,3 @@ if __name__ == "__main__":
 
     remove_duplicate_splitted_files(zincInputFolder, zincOutputFolder, "zinc")
 
-    print("Done")

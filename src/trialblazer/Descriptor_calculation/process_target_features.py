@@ -22,7 +22,6 @@ def process_target_features(
     query_data=None,
 ):
     if training_data:
-        print("start to preprocess target features from CHEMBL assay data")
         (
             target_id_list,
             preprocessed_target_unique_smiles,
@@ -41,19 +40,18 @@ def process_target_features(
             or preprocessed_target_unique_smiles is None
             or query_data is None
         ):
+            msg = "For test mode, training_target_list, fpe, preprocessed_target_unique_smiles, and query_data are required"
             raise ValueError(
-                "For test mode, training_target_list, fpe, preprocessed_target_unique_smiles, and query_data are required",
+                msg,
             )
         data_for_similarity = query_data
         target_ids = training_target_list
 
-    print("start to compute Tanimoto similarity")
     results_whole = tanimoto_similarity_calculation(
         fpe,
         data_for_similarity,
     )  # kernal crush
 
-    print("start to separate similarity results")
     separate_similarity_results(
         results_whole,
         target_ids,
@@ -62,18 +60,16 @@ def process_target_features(
         training_data=training_data,
     )  # kernal crush
 
-    print("start to organize similarity results")
     features, target_list = organize_similarity_results(
         target_ids,
         output_path_temp_save,
         training_data=training_data,
     )
 
-    print("start to binarize similarity values")
-    features.rename(columns={"smi": "SmilesForDropDu"}, inplace=True)
+    features = features.rename(columns={"smi": "SmilesForDropDu"})
 
     if not training_data:
-        print(len(target_list))
+        pass
     binarize_list, binarized_target_remain = binarize_similarity_value(
         features,
         target_list,

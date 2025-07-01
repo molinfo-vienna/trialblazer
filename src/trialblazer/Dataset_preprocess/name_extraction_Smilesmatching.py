@@ -40,7 +40,7 @@ def DNER_with_spacy(DataFrame):
     test_with_spacy = []
     doc_append = []
     nlp = spacy.blank("en")
-    for i, row in DataFrame["replace_Name"].items():
+    for row in DataFrame["replace_Name"].values():
         if pd.notna(row):
             doc = nlp(row)
             doc_append.append(doc)
@@ -73,9 +73,6 @@ def extract_results(LM_output):
             synonyms_append.append(np.nan)
             drugbank_id_append.append(np.nan)
 
-    print("length of name_append:", len(name_append))
-    print("length of synonyms_append:", len(synonyms_append))
-    print("length of drugbank_id_append:", len(drugbank_id_append))
 
     return name_append, synonyms_append, drugbank_id_append
 
@@ -97,15 +94,14 @@ def cirpy_SmilesMatching(FailToExtract, GoToSmilesMatching):
     smiles_append = []
     name = "replace_Name"
     for df in [FailToExtract, GoToSmilesMatching]:
-        for i, row in df[name].items():
+        for row in df[name].values():
             try:
                 if row:
                     smiles = cirpy.resolve(row, "smiles")
                     smiles_append.append(smiles)
                 else:
                     smiles_append.append(np.nan)
-            except Exception as e:
-                print(f"Error resolving SMILES for '{row}': {e}")
+            except Exception:
                 smiles_append.append(np.nan)
         name = "name_to_use"
     GoToSmileMatching = pd.concat(
@@ -127,14 +123,13 @@ def cirpy_SmilesMatching(FailToExtract, GoToSmilesMatching):
             [cirpy_result, cirpy_result_2],
             ignore_index=True,
         )
-    print("cirpy SMILES matching part finished!")
     return cirpy_result, GoToPubchempy
 
 
 def get_smiles_and_compounds(df, name):
     smiles_append = []
     cs_append = []
-    for i, row in df[name].items():
+    for row in df[name].values():
         if pd.notna(row):
             cs = pcp.get_compounds(row, "name")
             if len(cs) == 1:
@@ -168,7 +163,6 @@ def pubchempy_SmilesMatching(GoToPubchempy, name):
     pubchempy_result_2 = GoTo_NextRound.loc[~GoTo_NextRound["SMILES"].isna()]
     pubchempy_result = pd.concat([pubchempy_result_1, pubchempy_result_2])
     GoTo_NextRound = GoTo_NextRound.loc[GoTo_NextRound["SMILES"].isna()]
-    print("pubchempy SMILES matching part finished!")
     return pubchempy_result, GoTo_NextRound
 
 
@@ -181,8 +175,7 @@ def Extract_drug_name(input_df, input_name):
     input_df["drugbank_id"] = drugbank_id
     name_NeedToExcluded = ["antibody", "multi-drugs", "-"]
     input_df = input_df[
-        (input_df["replace_Name"].str.startswith(tuple(name_NeedToExcluded)) == False)
+        (input_df["replace_Name"].str.startswith(tuple(name_NeedToExcluded)) is False)
     ]
     FailToExtract, GoToSmilesMatching = select_drugs_GoToSecondRound(input_df)
-    print("Name extraction finished!")
     return FailToExtract, GoToSmilesMatching

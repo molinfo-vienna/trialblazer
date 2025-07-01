@@ -35,7 +35,7 @@ def compute_2Drdkit(mol):
 def MLP_simulation_test(X_new,y):
     cv = StratifiedKFold(n_splits=10)
     MCCs = []
-    for i, (train, test) in enumerate(cv.split(X_new, y)):
+    for _i, (train, test) in enumerate(cv.split(X_new, y)):
         p_estimate = np.mean(y[train])
         n_test_samples = len(X_new[test])
         y_random = bernoulli.rvs(p_estimate, size=n_test_samples)
@@ -55,7 +55,7 @@ def MLP_decision_threshold_optimization(X, y, opt_num_feature):
         max_iter=600,
     )
     opt_threshold_ap = []
-    for i, (train, test) in enumerate(cv.split(X_new, y)):
+    for _i, (train, test) in enumerate(cv.split(X_new, y)):
         classifier.fit(X_new[train], y[train])
         y_prob = classifier.predict_proba(X_new[test])[:, 1]
         fpr, tpr, thresholds = metrics.roc_curve(y[test], y_prob)
@@ -66,7 +66,7 @@ def MLP_decision_threshold_optimization(X, y, opt_num_feature):
     return opt_threshold_ap, opt_threshold_mean
 
 
-def MLP_cv(X, y, opt_num_feature="all", threshold=None):
+def MLP_cv(X, y, opt_num_feature="all", threshold=None) -> None:
     selector = SelectKBest(f_classif, k=opt_num_feature)
     X_new = selector.fit_transform(X, y)
     cv = StratifiedKFold(n_splits=10)
@@ -148,19 +148,19 @@ def MLP_cv(X, y, opt_num_feature="all", threshold=None):
     mean_tpr[-1] = 1.0
     mean_auc = auc(mean_fpr, mean_tpr)
     std_auc = np.std(aucs)
-    mean_mcc = np.mean(MCCs)
-    std_mcc = np.std(MCCs)
+    np.mean(MCCs)
+    np.std(MCCs)
     stacked_matrices = np.stack(cms, axis=0)
     mean_cms = np.mean(stacked_matrices, axis=0)
     mean_cms = np.round(mean_cms).astype(
         int,
     )  # get the integer of the mean number
-    mean_baccs = np.mean(baccs)
-    std_bacc = np.std(baccs)
-    mean_recalls = np.mean(recalls)
-    std_recall = np.std(recalls)
-    mean_precisions = np.mean(precisions)
-    std_precision = np.std(precisions)
+    np.mean(baccs)
+    np.std(baccs)
+    np.mean(recalls)
+    np.std(recalls)
+    np.mean(precisions)
+    np.std(precisions)
 
     ax1.set(
         xlabel="Iteration",
@@ -180,7 +180,7 @@ def MLP_cv(X, y, opt_num_feature="all", threshold=None):
         mean_fpr,
         mean_tpr,
         color="b",
-        label=r"Mean ROC (AUC = %0.2f $\pm$ %0.2f)" % (mean_auc, std_auc),
+        label=rf"Mean ROC (AUC = {mean_auc:0.2f} $\pm$ {std_auc:0.2f})",
         lw=2,
         alpha=0.8,
     )
@@ -202,10 +202,6 @@ def MLP_cv(X, y, opt_num_feature="all", threshold=None):
         title="ROC Curve",
     )
     ax.legend(loc="lower right")
-    print(f"Matthews Correlation Coefficient = {mean_mcc:.2f}, {std_mcc:.2f}")
-    print(f"Balanced Accuracy score = {mean_baccs:.2f}, {std_bacc:.2f}")
-    print(f"recall = {mean_recalls:.2f}, {std_recall:.2f}")
-    print(f"precision = {mean_precisions:.2f}, {std_precision:.2f}")
     disp = ConfusionMatrixDisplay(
         confusion_matrix=mean_cms,
         display_labels=classifier.classes_,
@@ -213,7 +209,7 @@ def MLP_cv(X, y, opt_num_feature="all", threshold=None):
     disp.plot(xticks_rotation="vertical")
 
 
-def RF_cv(X, y, opt_num_feature="all"):
+def RF_cv(X, y, opt_num_feature="all") -> None:
     selector = SelectKBest(f_classif, k=opt_num_feature)
     X_new = selector.fit_transform(X, y)
     cv = StratifiedKFold(n_splits=10)
@@ -282,22 +278,22 @@ def RF_cv(X, y, opt_num_feature="all"):
     mean_tpr[-1] = 1.0
     mean_auc = auc(mean_fpr, mean_tpr)
     std_auc = np.std(aucs)
-    mean_mcc = np.mean(MCCs)
-    std_mcc = np.std(MCCs)
+    np.mean(MCCs)
+    np.std(MCCs)
     stacked_matrices = np.stack(cms, axis=0)
     mean_cms = np.mean(stacked_matrices, axis=0)
-    mean_baccs = np.mean(baccs)
-    std_bacc = np.std(baccs)
-    mean_recalls = np.mean(recalls)
-    std_recall = np.std(recalls)
-    mean_precisions = np.mean(precisions)
-    std_precision = np.std(precisions)
+    np.mean(baccs)
+    np.std(baccs)
+    np.mean(recalls)
+    np.std(recalls)
+    np.mean(precisions)
+    np.std(precisions)
 
     ax.plot(
         mean_fpr,
         mean_tpr,
         color="b",
-        label=r"Mean ROC (AUC = %0.2f $\pm$ %0.2f)" % (mean_auc, std_auc),
+        label=rf"Mean ROC (AUC = {mean_auc:0.2f} $\pm$ {std_auc:0.2f})",
         lw=2,
         alpha=0.8,
     )
@@ -319,10 +315,6 @@ def RF_cv(X, y, opt_num_feature="all"):
     )
     ax.legend(loc="lower right")
     plt.show()
-    print(f"Matthews Correlation Coefficient = {mean_mcc:.2f}, {std_mcc:.2f}")
-    print(f"Balanced Accuracy score = {mean_baccs:.2f}, {std_bacc:.2f}")
-    print(f"recall = {mean_recalls:.2f}, {std_recall:.2f}")
-    print(f"precision = {mean_precisions:.2f}, {std_precision:.2f}")
     disp = ConfusionMatrixDisplay(
         confusion_matrix=mean_cms,
         display_labels=classifier.classes_,
@@ -346,7 +338,7 @@ def roc_cv_ANOVA_10fold(X, y, k_value, rf=False):
     MCCs = []
     tprs = []
     mean_fpr = np.linspace(0, 1, 100)
-    for i, (train, test) in enumerate(cv.split(X_new, y)):
+    for _i, (train, test) in enumerate(cv.split(X_new, y)):
         classifier.fit(X_new[train], y[train])
         pred = classifier.predict(X_new[test])
         mcc = matthews_corrcoef(y[test], pred)
@@ -361,7 +353,7 @@ def roc_cv_ANOVA_10fold(X, y, k_value, rf=False):
     return tprs, aucs, MCCs
 
 
-def feature_selection(X, y, feature_list, name, k_list):
+def feature_selection(X, y, feature_list, name, k_list) -> None:
     MCC_of_different_ANOVA = []
     mean_mcc = []
     mean_fpr = np.linspace(0, 1, 100)
@@ -385,8 +377,7 @@ def feature_selection(X, y, feature_list, name, k_list):
             mean_fpr,
             mean_tpr,
             color=c[i],
-            label=r"K=%s, ROC_AUC = %0.2f $\pm$ %0.2f, MCC = %0.2f"
-            % (k, mean_auc, std_auc, mean_mcc),
+            label=rf"K={k}, ROC_AUC = {mean_auc:0.2f} $\pm$ {std_auc:0.2f}, MCC = {mean_mcc:0.2f}",
             lw=2,
             alpha=0.4,
         )
@@ -404,7 +395,7 @@ def feature_selection(X, y, feature_list, name, k_list):
     ax.set(
         xlim=[-0.05, 1.05],
         ylim=[-0.05, 1.05],
-        title=r"ROC Curve (%s)" % (name),
+        title=rf"ROC Curve ({name})",
     )
     ax.set_xlabel("False Positive Rate (Positive label = 1.0)")
     ax.set_ylabel("True Positive Rate (Positive label = 1.0)")
@@ -486,17 +477,10 @@ def trialblazer_func(
         predict_result_sim_remove_multi = predict_result_sim[
             ~predict_result_sim["id"].str.contains(r"\d+x\d+")
         ]  # Remove multi-component drugs if the toxicity of the compounds is uncertain
-        print(
-            "the number of the removed multi-component drugs: ",
-            len(
-                predict_result_sim[predict_result_sim["id"].str.contains(r"\d+x\d+")],
-            ),
-        )
-        predict_result_sim_remove_multi.sort_values(
+        predict_result_sim_remove_multi = predict_result_sim_remove_multi.sort_values(
             by="PrOCTOR_score",
             ascending=False,
             ignore_index=True,
-            inplace=True,
         )
         predict_result_sim = predict_result_sim_remove_multi
 
@@ -508,7 +492,7 @@ def trialblazer_func(
         training_fpe,
     )
     # prediction output
-    predict_result_sim.rename(columns={"SmilesForDropDu": "smi"}, inplace=True)
+    predict_result_sim = predict_result_sim.rename(columns={"SmilesForDropDu": "smi"})
     prediction_output = predict_result_sim.merge(
         similarity_closest_distance[["smi", "closest_distance", "closest_smi"]],
         how="left",
