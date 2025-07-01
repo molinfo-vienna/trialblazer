@@ -26,7 +26,7 @@ dependencies = [
 "click",
 "pandas",
 "requests",
-"rdkit==2024.09.6",
+"rdkit>=2024.09.6",
 "numpy",
 "scikit-learn",
 "seaborn",
