@@ -119,7 +119,7 @@ def toxicity_set(studies_set, drop_withdrawals_set):
 
     # filter toxicity description in "why_stopped" and "reason" categories
     selected_toxicity_why_stopped, non_toxicity_why_stopped = keywords_filtering(
-        studies_simplify_dropna_sim, "why_stopped"
+        studies_simplify_dropna_sim, "why_stopped",
     )
     selected_toxicity_reason, non_toxicity_reason = keywords_filtering(
         drop_withdrawals_dropna_sim,
@@ -186,7 +186,7 @@ def preprocess_aact(unzipFolder_path):
 
             Agg_name, intervention_set_ori = check_name(interventions_set)
             toxicity_negative, toxicity_negative_excluded_inclnan = toxicity_set(
-                studies_set, drop_withdrawals_set
+                studies_set, drop_withdrawals_set,
             )
 
             # Append the results in different files

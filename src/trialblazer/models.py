@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from tqdm import tqdm
-from rdkit.Chem import AllChem, Descriptors
+from rdkit.Chem import AllChem
+from rdkit.Chem import Descriptors
 from rdkit.ML.Descriptors import MoleculeDescriptors
 from scipy.stats import bernoulli
 from sklearn import metrics
@@ -20,6 +20,7 @@ from sklearn.metrics import recall_score
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import StratifiedKFold
 from sklearn.neural_network import MLPClassifier
+from tqdm import tqdm
 
 
 def get_morgan2(mol):
@@ -419,8 +420,7 @@ def pairwise_tanimoto_similarity_closest_distance(smi_list, query_set_smi_list, 
         sim_dict = dict.fromkeys(smi_list, default_value)
         for idx, value in sim_results:
             p = smi_list[idx]
-            if value > sim_dict[p]:
-                sim_dict[p] = value
+            sim_dict[p] = max(sim_dict[p], value)
         results.append({"smi": my_smi, "dict": sim_dict})
     temp_save = pd.DataFrame(results)
     temp_save[smi_list] = [list(value_1.values()) for value_1 in temp_save["dict"]]
@@ -515,7 +515,7 @@ def trialblazer_func(
         on="smi",
     )
     prediction_output["prediction"] = prediction_output["prediction"].map(
-        {0: "benign", 1: "toxic"}
+        {0: "benign", 1: "toxic"},
     )
 
     # return (
@@ -539,7 +539,7 @@ def Trialblazer(
 ):
     if classifier is None:
         classifier, selector = trialblazer_train(
-            training_set=training_set, y=y, features=features, k=k
+            training_set=training_set, y=y, features=features, k=k,
         )
     return trialblazer_func(
         classifier=classifier,

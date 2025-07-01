@@ -1,9 +1,11 @@
+from rdkit import Chem
+from rdkit.Chem import AllChem
 from .process_similarity_results import binarize_similarity_value
 from .process_similarity_results import organize_similarity_results
 from .process_similarity_results import separate_similarity_results
-from rdkit import Chem
-from rdkit.Chem import AllChem
-from .similarity_based_target_calculation import tanimoto_similarity_calculation
+from .similarity_based_target_calculation import (
+    tanimoto_similarity_calculation,
+)
 from .similarity_based_target_calculation import target_features_preprocess
 
 

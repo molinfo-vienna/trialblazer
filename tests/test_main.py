@@ -1,8 +1,7 @@
 import os
+import numpy as np
 import pandas as pd
 import trialblazer
-import os
-import numpy as np
 from trialblazer import Trialblazer
 
 base_model_folder = os.path.join(

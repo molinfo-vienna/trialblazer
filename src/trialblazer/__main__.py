@@ -1,6 +1,5 @@
-from trialblazer import Trialblazer
-
 import click
+from trialblazer import Trialblazer
 
 
 @click.command()

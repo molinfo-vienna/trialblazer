@@ -1,7 +1,7 @@
+import base64
+import hashlib
 import multiprocessing as mp
 import os
-import hashlib
-import base64
 import pandas as pd
 from .preprocess_molecules import preprocess_database
 from .split_files import split_large_files
@@ -18,7 +18,7 @@ def get_data_from_DB(moleculeCsv, reformatedFile, smiles_col="SMILES", id_col=No
         lambda x: base64.urlsafe_b64encode(hashlib.md5(x.encode("utf8")).digest())
         .decode()
         .strip()
-        .strip("=")
+        .strip("="),
     )
     if id_col is not None:
         ID = moleculeCsv[id_col]
@@ -54,7 +54,7 @@ def preprocess(moleculeCsv, outputFolder, smiles_col="SMILES", id_col=None):
     reformatedFile = reformatedFolder / reformatedName
 
     smilesDict = get_data_from_DB(
-        moleculeCsv, reformatedFile, smiles_col=smiles_col, id_col=id_col
+        moleculeCsv, reformatedFile, smiles_col=smiles_col, id_col=id_col,
     )
     # smilesDict = get_data_from_DB(inputFile, reformatedFile)
     get_molecule_dict_as_smi_output(smilesDict, reformatedFile)

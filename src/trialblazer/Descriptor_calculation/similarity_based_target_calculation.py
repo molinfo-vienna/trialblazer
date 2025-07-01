@@ -33,7 +33,7 @@ def target_features_preprocess(
         lambda x: Chem.MolToSmiles(x, isomericSmiles=False),
     )
     target_label_smpl = merged_data[["target_id", "SmilesWithoutStereo"]].dropna(
-        subset=["target_id"]
+        subset=["target_id"],
     )
     target_id_list, preprocessed_target_unique_smiles, fpe = generate_h5file(
         target_label_smpl,
