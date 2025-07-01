@@ -116,3 +116,10 @@ python -m pip install .
 ## Credits
 
 This package was created with [Copier](https://github.com/copier-org/copier) and the [NLeSC/python-template](https://github.com/NLeSC/python-template).
+
+
+## Citation
+
+```
+Zhang, H., Welsch, M., Schueller, W., & Kirchmair, J. (2025). Trialblazer: A Chemistry-Focused Predictor of Toxicity Risks in Late-Stage Drug Development [Data set]. Zenodo. https://doi.org/10.5281/zenodo.15783346
+```
