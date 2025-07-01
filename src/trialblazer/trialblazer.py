@@ -60,6 +60,8 @@ class Trialblazer:
         # features: None | list[str] = None,
         morgan_n_bits: int = 2048,
         model_url: str | None = "https://zenodo.org/records/15783346/files/precalculated_data_for_trialblazer_model.tar.gz?download=1",
+        archive_type:str="tar.gz",
+        top_folder:bool=False,
     ) -> None:
         """Create the triablazer object."""
         self.input_file = input_file
@@ -87,6 +89,8 @@ class Trialblazer:
         else:
             self.k = 900
         self.model_url = model_url
+        self.archive_type = archive_type
+        self.top_folder=top_folder
 
     def import_smiles(self, smiles: list[str] | None = None) -> None:
         """Importing smiles either from the input file or from a list of smiles."""
@@ -121,7 +125,11 @@ class Trialblazer:
                 # read_smiles = smiles_df["SMILES"].to_list()
                 # self.import_smiles(read_smiles)
 
-    def download_model(self,archive_type:str="tar.gz",top_folder:bool=False) -> None:
+    def download_model(self,archive_type:str|None=None,top_folder:bool|None=None) -> None:
+        if archive_type is None:
+            archive_type=self.archive_type
+        if top_folder is None:
+            top_folder=self.top_folder
         if not os.path.exists(self.model_folder):
             os.makedirs(self.model_folder)
         if not os.path.exists(
