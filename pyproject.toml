@@ -34,7 +34,7 @@ dependencies = [
 "psutil",
 "joblib",
 "pyzmq",
-"acm_hamburg_legacy@git+https://github.com/molinfo-vienna/acm-hamburg-legacy.git",
+"acm_hamburg_legacy@https://github.com/molinfo-vienna/acm-hamburg-legacy.git",
 "chembl_structure_pipeline",
 "fpsim2",
 "cirpy",
