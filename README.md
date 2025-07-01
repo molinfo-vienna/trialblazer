@@ -16,9 +16,14 @@
 
 ## Data
 
-You can download the data, including training data, test set data with corresponding prediction results, and bioactivity data, from: [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.15484761.svg)](https://doi.org/10.5281/zenodo.15484761)
+You can download the data, including training_and_test_data, precalculated_data_for_trialblazer_model and precomputed_data_for_reproduction_with_notebooks, from: https://doi.org/10.5281/zenodo.15783346
 
 To download the data automatically, see below the description of the Command Line Interface.
+
+## Reproduce experiments
+
+To reproduce the experiments in the paper, you can check the notebooks here: 
+https://github.com/molinfo-vienna/trialblazer_notebooks
 
 ## How to use Trialblazer
 
@@ -102,15 +107,18 @@ To install via PyPI, simply run:
 pip install trialblazer
 ```
 
-To install trialblazer from GitHub repository, do:
-
+To install trialblazer from GitHub repository through SSH, do:
 ```console
 git clone git@github.com:molinfo-vienna/trialblazer.git
 cd trialblazer
 python -m pip install .
 ```
-
-
+or through HTTPS:
+```console
+git clone https://github.com/molinfo-vienna/trialblazer_notebooks.git
+cd trialblazer
+python -m pip install .
+```
 
 
 ## Credits
