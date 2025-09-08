@@ -6,7 +6,7 @@ import pandas as pd
 substring_1 = ["(T|t)oxic"]
 substring_2 = [
     "(U|u)nrelated",
-    "(N|n)ot (R|r)elated",
+    "(N|n)ot (R|r)elated", 
     "unknown",
     "(N|n)ot (S|s)tudy (R|r)elated",
     "non-related",
@@ -57,6 +57,7 @@ def extract_filesFromZip(input_Path, dir_out):
 
 def map_names_intervention(
     Agg_name,
+    intervention_set_ori,
     toxicity_negative,
     toxicity_negative_excluded,
 ):
@@ -137,10 +138,10 @@ def toxicity_set(studies_set, drop_withdrawals_set):
         how="outer",
         on="nct_id",
     )
-    toxicity_negative_excluded_inclnan = merged_two_nan_set_sim.append(
-        toxicity_negative_excluded,
-        ignore_index=True,
-    )
+    toxicity_negative_excluded_inclnan = pd.concat([
+        merged_two_nan_set_sim,
+        toxicity_negative_excluded
+    ], ignore_index=True)
     return toxicity_negative, toxicity_negative_excluded_inclnan
 
 
@@ -148,8 +149,9 @@ def check_name(interventions_set):
     interventions_Drug = interventions_set.loc[
         interventions_set.intervention_type == "Drug"
     ]
+    # Handle NaN values before applying str.contains
     Name_exclude_placebo = interventions_Drug[
-        interventions_Drug.name.str.contains("(P|p)lacebo") == False
+        ~interventions_Drug.name.fillna('').str.contains("(P|p)lacebo")
     ]
     Name_exclude_placebo_du = Name_exclude_placebo.drop_duplicates(
         subset=["nct_id", "name"],
