@@ -1,8 +1,7 @@
 import os
+import numpy as np
 import pandas as pd
 import trialblazer
-import os
-import numpy as np
 from trialblazer import Trialblazer
 
 base_model_folder = os.path.join(
@@ -25,9 +24,9 @@ output_data = output_data[["id", "pred_prob_positive", "PrOCTOR_score"]]
 output_rm = output_data[~output_data["id"].str.contains(r"\d+x\d+")]
 
 output_data = output_data.set_index("id")
-output_data.sort_index(inplace=True)
+output_data = output_data.sort_index()
 output_rm = output_rm.set_index("id")
-output_rm.sort_index(inplace=True)
+output_rm = output_rm.sort_index()
 
 
 def test_run(tmpdir):
@@ -47,6 +46,6 @@ def test_run_no_remove(tmpdir):
     df = tb.result.copy()
     df = df[["id", "pred_prob_positive", "PrOCTOR_score"]]
     df = df.set_index("id")
-    df.sort_index(inplace=True)
+    df = df.sort_index()
     assert len(df.index) == len(output_data.index)
     assert np.isclose(df, output_data).all()

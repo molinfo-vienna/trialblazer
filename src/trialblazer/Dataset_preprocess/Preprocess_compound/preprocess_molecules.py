@@ -4,7 +4,7 @@ from acm_hamburg_legacy import MoleculePreprocessorExtended
 from rdkit import RDLogger
 
 
-def preprocess_database(file):
+def preprocess_database(file) -> None:
     """Processes the molecules of a file and save them as a csv in ../preprocessedSmiles/outFilename.csv
     :param file: file with molecules to be processed.
     """
@@ -13,10 +13,10 @@ def preprocess_database(file):
     outpath = Path(file).parent.parent / "preprocessedSmiles" / outFilename
 
     if Path(outpath).is_file():
-        raise Exception(f"File {outpath} already exists!")
+        msg = f"File {outpath} already exists!"
+        raise Exception(msg)
 
     smilesIDdict = convert_csv_to_smiles_dict(file)
-    print(f"{file} successfully converted to smilesDict")
 
     listOfSmiles = list(smilesIDdict.keys())
     rdLogger = RDLogger.logger()
@@ -26,7 +26,6 @@ def preprocess_database(file):
             listOfSmiles,
         )
     )
-    print("the moleculesProcessed generated")
     # set c++ log level of rdkit temporarily to ERROR so that csp does not clutter
     # stdout with logging
     rdLogger.setLevel(RDLogger.ERROR)
@@ -35,19 +34,14 @@ def preprocess_database(file):
 
     moleculesProcessed.element_filter()
     moleculesProcessed.check_molecules_validity()
-    print(
-        "finish moleculesProcessed element_filter and check molecules_validity",
-    )
     # rawsmiles:preprocessedSmiles dict
     preprocessedSmilesDict = moleculesProcessed.get_rawsmiles_smiles_dict()
 
-    print(f"{file} successfully preprocessed.")
 
     moleculesProcessed.canonalize_tautomer()
     # rawsmiles:tautomerizedSmiles dict
     tautoMoleculesDict = moleculesProcessed.get_rawsmiles_smiles_dict()
 
-    print(f"{file} successfully tautomerized.")
 
     logdir = Path(file).parent.parent / "log"
     if not logdir.exists():
@@ -70,7 +64,7 @@ def preprocess_database(file):
 
 
 def mergeDict(dict1, dict2):
-    """Merge dictionaries and keep values of common keys in list"""
+    """Merge dictionaries and keep values of common keys in list."""
     dict3 = {**dict1, **dict2}
     for key, value in dict3.items():
         if key in dict1 and key in dict2:
@@ -78,8 +72,8 @@ def mergeDict(dict1, dict2):
     return dict3
 
 
-def save_dict_as_csv(mergedDict, outputFile, headerList):
-    """Saves the preprocessed molecules as smiles in a tab seperated csv
+def save_dict_as_csv(mergedDict, outputFile, headerList) -> None:
+    """Saves the preprocessed molecules as smiles in a tab seperated csv.
 
     :param mergedDict: a rawSmiles: [[prepSmiles, id], canonSmiles] dictionary
     :param outputFile: filepath to the output file
@@ -91,17 +85,16 @@ def save_dict_as_csv(mergedDict, outputFile, headerList):
             csvFile.write(
                 f"{rawsmiles}\t{values[0][0]}\t{values[0][1]}\t{values[1]}\n",
             )
-    print(f"{outputFile} successfully saved")
 
 
 def convert_csv_to_smiles_dict(file):
-    """Expects a csv file with header line (which is skipped) and returns a rawsmiles:databaseID dict
+    """Expects a csv file with header line (which is skipped) and returns a rawsmiles:databaseID dict.
 
     :param file: a csv file, using 'space' as delimiter
     :return: a rawsmiles:databaseID dict
     """
     # rawsmiles:databaseID dict
-    smilesIDdict = dict()
+    smilesIDdict = {}
     with open(file, encoding="utf8") as smilesIDfile:
         # skip first (header) line
         next(smilesIDfile)

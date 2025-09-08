@@ -16,7 +16,6 @@ classifiers = [
     "Development Status :: 2 - Pre-Alpha",
     "Intended Audience :: Developers",
     "Intended Audience :: Science/Research",
-    "",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.10",
@@ -26,7 +25,8 @@ classifiers = [
 dependencies = [
 "click",
 "pandas",
-"rdkit",
+"requests",
+"rdkit>=2024.09.6",
 "numpy",
 "scikit-learn",
 "seaborn",
@@ -34,11 +34,10 @@ dependencies = [
 "psutil",
 "joblib",
 "pyzmq",
-"acm_hamburg_legacy@git+https://github.com/molinfo-vienna/acm-hamburg-legacy.git",
+"acm-hamburg-legacy",
 "chembl_structure_pipeline",
 "fpsim2",
 "cirpy",
-"requests",
 ]
 description = "A Chemistry-Focused Predictor of Toxicity Risks in Late-Stage Drug Development"
 keywords = ["chemoinformatics","scientific software","chemistry","drug discovery","toxicity"]

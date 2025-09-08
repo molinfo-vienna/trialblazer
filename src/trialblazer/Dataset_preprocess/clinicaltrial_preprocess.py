@@ -39,7 +39,7 @@ substring_2 = [
 ]
 
 
-def extract_filesFromZip(input_Path, dir_out):
+def extract_filesFromZip(input_Path, dir_out) -> None:
     for filename in os.listdir(input_Path):
         if filename.endswith(".zip"):
             input_file = os.path.join(input_Path, filename)
@@ -64,7 +64,7 @@ def map_names_intervention(
     # Use "interventions set" to map the name of drugs through nct_id
     lst = [";", "and"]
     OneDrug = Agg_name[~Agg_name["name"].str.contains("|".join(lst))]
-    OneDrug.rename(columns={"name": "Name"}, inplace=True)
+    OneDrug = OneDrug.rename(columns={"name": "Name"})
     toxicity_negative_sim = toxicity_negative[
         ["nct_id", "reason", "why_stopped", "phase", "overall_status"]
     ]
@@ -120,7 +120,7 @@ def toxicity_set(studies_set, drop_withdrawals_set):
 
     # filter toxicity description in "why_stopped" and "reason" categories
     selected_toxicity_why_stopped, non_toxicity_why_stopped = keywords_filtering(
-        studies_simplify_dropna_sim, "why_stopped"
+        studies_simplify_dropna_sim, "why_stopped",
     )
     selected_toxicity_reason, non_toxicity_reason = keywords_filtering(
         drop_withdrawals_dropna_sim,
@@ -188,7 +188,7 @@ def preprocess_aact(unzipFolder_path):
 
             Agg_name, intervention_set_ori = check_name(interventions_set)
             toxicity_negative, toxicity_negative_excluded_inclnan = toxicity_set(
-                studies_set, drop_withdrawals_set
+                studies_set, drop_withdrawals_set,
             )
 
             # Append the results in different files
@@ -223,7 +223,7 @@ def preprocess_aact(unzipFolder_path):
     )
 
 
-def prepocess_wholeset(count_path):
+def prepocess_wholeset(count_path) -> None:
     toxic_append = []
     Agg_name_append = []
     benign_onedrug_append = []
@@ -232,7 +232,6 @@ def prepocess_wholeset(count_path):
         match = re.search(r"\d{4}", filename)
         if not filename.endswith(".zip") and match:
             input_file = os.path.join(count_path, filename)
-            print(input_file)
             (
                 Agg_name,
                 toxic_onedrug,
@@ -253,9 +252,9 @@ def prepocess_wholeset(count_path):
         axis=0,
     )
 
-    Merge_name_append_count = toxic_append_total.nct_id.unique().size
-    Agg_name_append_count = Agg_name_append_total.nct_id.unique().size
-    intervention_set_ori_count = intervention_set_ori_append_total.nct_id.unique().size
+    toxic_append_total.nct_id.unique().size
+    Agg_name_append_total.nct_id.unique().size
+    intervention_set_ori_append_total.nct_id.unique().size
 
     check_other_phase = count_path + "/" + "check_other_phase_1"
     if not os.path.exists(check_other_phase):
@@ -272,9 +271,6 @@ def prepocess_wholeset(count_path):
         check_other_phase + "/" + "intervention_set_ori" + ".csv"
     )
 
-    print(f"unique_Merge_id:{Merge_name_append_count}")
-    print(f"unique_agg_id:{Agg_name_append_count}")
-    print(f"unique_intervention_set_ori_id:{intervention_set_ori_count}")
 
     toxic_append_total.to_csv(Merge_name_path, sep="|")
     benign_append_total.to_csv(toxicity_negative_excluded_path, sep="|")

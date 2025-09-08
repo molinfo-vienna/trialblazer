@@ -1,7 +1,8 @@
 import os
 from pathlib import Path
-import pandas as pd
+from typing import Optional
 import numpy as np
+import pandas as pd
 from tqdm import tqdm
 
 
@@ -12,7 +13,7 @@ def separate_similarity_results(
     output_path_temp_save,
     training_data=False,
     start_index=0,
-):
+) -> None:
     default_value = -1
     for i, array in tqdm(
         generator_separate_results(results, start_index=start_index),
@@ -38,7 +39,6 @@ def separate_similarity_results(
             Path(output_path_temp_save.name) / f"temp_save_{i}.csv",
             sep="|",
         )
-    print("the separation of similarity results is finished!")
 
 
 def organize_similarity_results(
@@ -111,10 +111,8 @@ def remove_tested_inactive_targets(
 
 def remove_invariant_target(sanity_checked_dataframe, target_list):
     unique_counts = sanity_checked_dataframe[target_list].nunique()
-    target_remove = unique_counts[unique_counts == 1]
+    unique_counts[unique_counts == 1]
     target_binarize_list = unique_counts[unique_counts != 1].index.to_list()
-    print(f"the number of removed targets: {len(target_remove)}")
-    print(f"the number of remaining targets: {len(target_list)}")
     binarized_target_remain = sanity_checked_dataframe[target_binarize_list]
     binarized_target_remain["SmilesForDropDu"] = sanity_checked_dataframe[
         "SmilesForDropDu"
@@ -122,16 +120,16 @@ def remove_invariant_target(sanity_checked_dataframe, target_list):
     return binarized_target_remain, target_binarize_list
 
 
-def threshold_binarize(x, threshold):
+def threshold_binarize(x, threshold) -> Optional[str]:
     if x >= threshold:
         return "1"
     if x < threshold:
         return "0"
+    return None
 
 
 def generator_separate_results(results, start_index=0):
-    for i, array in enumerate(
+    yield from enumerate(
         results.similarity_results[start_index:],
         start=start_index,
-    ):
-        yield i, array
+    )

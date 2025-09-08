@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Zhang"
+  given-names: "Huanni"
+  orcid: "https://orcid.org/0009-0005-9823-9347"
+- family-names: "Welsch"
+  given-names: "Matthias"
+  orcid: "https://orcid.org/0009-0007-9443-895X"
+- family-names: "Schueller"
+  given-names: "William"
+  orcid: "https://orcid.org/0000-0002-4431-6934"
+- family-names: "Kirchmair"
+  given-names: "Johannes"
+  orcid: "https://orcid.org/0000-0003-2667-5877"
+title: ": A Chemistry-Focused Predictor of Toxicity Risks in Late-Stage Drug Development"
+doi: 10.5281/zenodo.15783346
+date-released: 2025-07-01
+url: "https://github.com/molinfo-vienna/trialblazer"

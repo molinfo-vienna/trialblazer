@@ -7,9 +7,9 @@ Helper script to split large files, used before preprocess_molecules.py
 """
 
 
-def split_large_files(file, filesize):
+def split_large_files(file, filesize) -> None:
     """Splits a large file with molecules and ID into smaller files of the given file size and saves them in
-    ../smiles_input/databse_n.smi
+    ../smiles_input/databse_n.smi.
 
     :param file: large file
     :param filesize: number of lines in the smaller files
@@ -28,7 +28,7 @@ def split_large_files(file, filesize):
                 outFilename = fileName + "_" + str(lineno // filesize) + ".smi"
                 outpath = outputFolder / outFilename
                 smallfile = open(outpath, "w", encoding="utf-8")
-                if not lineno == 0:
+                if lineno != 0:
                     smallfile.write("smiles ID\n")
             smallfile.write(line)
         if smallfile:

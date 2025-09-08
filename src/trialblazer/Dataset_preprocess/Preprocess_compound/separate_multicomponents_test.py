@@ -7,7 +7,7 @@ Script to split multi-component compounds into individual compounds. Use Chem.Ge
 """
 
 
-def separate_multicomponents_test(inputDir):
+def separate_multicomponents_test(inputDir) -> None:
     outdir = Path(inputDir).parent / "separate_multicom_GetMolFrags"
     if not outdir.exists():
         outdir.mkdir()
@@ -33,8 +33,7 @@ def separate_multicomponents_test(inputDir):
 
                         molFrag_pre = Chem.GetMolFrags(pre_mol, asMols=True)
                         if tauto_mol is None:
-                            print("Invalid SMILES: ", tautomerizedSmiles)
-                            molFrage_tauto = tauto_mol
+                            pass
                         else:
                             molFrag_tauto = Chem.GetMolFrags(
                                 tauto_mol,
@@ -48,7 +47,6 @@ def separate_multicomponents_test(inputDir):
                             of.write(line)
                         else:
                             count += 1
-                            print(line)
                             for i in range(len(smilesList)):
                                 new_name = str(name) + "x" + str(i)
                                 of.write(
@@ -63,5 +61,3 @@ def separate_multicomponents_test(inputDir):
                                 )
                     else:
                         counter += 1
-    print("entry != 4:", counter)
-    print("multi-component compounds:", count)
