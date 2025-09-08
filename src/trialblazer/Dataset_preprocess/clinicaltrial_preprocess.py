@@ -149,20 +149,19 @@ def check_name(interventions_set):
     interventions_Drug = interventions_set.loc[
         interventions_set.intervention_type == "Drug"
     ]
-    # Handle NaN values before applying str.contains
     Name_exclude_placebo = interventions_Drug[
         ~interventions_Drug.name.fillna('').str.contains("(P|p)lacebo")
     ]
-    Name_exclude_placebo_du = Name_exclude_placebo.drop_duplicates(
+    Name_exclude_placebo_dropdu = Name_exclude_placebo.drop_duplicates(
         subset=["nct_id", "name"],
         keep="last",
     )  # deduplicates the drugs in the same trial but using different doses
     Agg_name = (
-        Name_exclude_placebo_du.groupby(["nct_id"])["name"]
+        Name_exclude_placebo_dropdu.groupby(["nct_id"])["name"]
         .agg(lambda x: "; ".join(x.astype(str)))
         .reset_index()
     )
-    return Agg_name, Name_exclude_placebo_du
+    return Agg_name, Name_exclude_placebo_dropdu
 
 
 def preprocess_aact(unzipFolder_path):
