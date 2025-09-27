@@ -1,13 +1,13 @@
 from __future__ import annotations
-from typing import TYPE_CHECKING
-from typing import Iterable
+
+from tempfile import TemporaryDirectory
+from typing import TYPE_CHECKING, Iterable
+
 import pandas as pd
 from nerdd_module import Model
-from nerdd_module.config import YamlConfiguration
-from nerdd_module.preprocessing import FilterByWeight
-from nerdd_module.preprocessing import Sanitize
-from rdkit.Chem import MolFromSmiles
-from rdkit.Chem import MolToSmiles
+from nerdd_module.preprocessing import FilterByWeight, Sanitize
+from rdkit.Chem import MolFromSmiles, MolToSmiles
+
 from trialblazer.trialblazer import Trialblazer
 
 if TYPE_CHECKING:
@@ -50,8 +50,9 @@ class TrialblazerModel(Model):
         self.tb.smiles = pd.DataFrame({"SMILES": smiles, "chembl_id": ids})
 
         # run the model
-        self.tb.prepare_testset()
-        self.tb.run_model()
+        with TemporaryDirectory() as tmpdir:
+            self.tb.prepare_testset(out_folder=tmpdir, force=True)
+            self.tb.run_model()
 
         # get the results
         df = self.tb.get_dataframe()
