@@ -47,12 +47,12 @@ def MLP_simulation_test(X_new,y):
 def MLP_decision_threshold_optimization(X, y, opt_num_feature):
     selector = SelectKBest(f_classif, k=opt_num_feature)
     X_new = selector.fit_transform(X, y)
-    cv = StratifiedKFold(n_splits=10)
+    cv = StratifiedKFold(n_splits=70)
     classifier = MLPClassifier(
         hidden_layer_sizes=(10,),
         random_state=42,
         learning_rate_init=0.0001,
-        max_iter=600,
+        max_iter=200,
     )
     opt_threshold_ap = []
     for _i, (train, test) in enumerate(cv.split(X_new, y)):
@@ -74,10 +74,10 @@ def MLP_cv(X, y, opt_num_feature="all", threshold=None) -> None:
         classifier = MLPClassifier(random_state=42)
     else:
         classifier = MLPClassifier(
-            hidden_layer_sizes=(10,),
+            hidden_layer_sizes=(70,),
             random_state=42,
             learning_rate_init=0.0001,
-            max_iter=600,
+            max_iter=200,
         )
     tprs, aucs, MCCs, cms, baccs, recalls, precisions = (
         [],
@@ -213,21 +213,21 @@ def RF_cv(X, y, opt_num_feature="all") -> None:
     selector = SelectKBest(f_classif, k=opt_num_feature)
     X_new = selector.fit_transform(X, y)
     cv = StratifiedKFold(n_splits=10)
-    if opt_num_feature == "all":
-        classifier = RandomForestClassifier(
-            class_weight="balanced",
-            max_features="sqrt",
-            random_state=42,
-        )
-    else:
-        classifier = RandomForestClassifier(
-            n_estimators=200,
-            class_weight="balanced",
-            max_features="sqrt",
-            min_samples_split=2,
-            random_state=42,
-            max_depth=30,
-        )
+    # if opt_num_feature == "all":
+    #     classifier = RandomForestClassifier(
+    #         class_weight="balanced",
+    #         max_features="sqrt",
+    #         random_state=42,
+    #     )
+    # else:
+    #     classifier = RandomForestClassifier(
+    #         n_estimators=200,
+    #         class_weight="balanced",
+    #         max_features="sqrt",
+    #         min_samples_split=2,
+    #         random_state=42,
+    #         max_depth=30,
+    #     )
     tprs = []
     aucs = []
     MCCs = []
@@ -407,7 +407,7 @@ def pairwise_tanimoto_similarity_closest_distance(smi_list, query_set_smi_list, 
     default_value = -1
     results = []
     for my_smi in tqdm(query_set_smi_list, desc="Calculating similarities"):
-        sim_results = fpe.similarity(my_smi, 0, n_workers=31)
+        sim_results = fpe.similarity(my_smi, threshold=0, metric='tanimoto', n_workers=20)
         sim_dict = dict.fromkeys(smi_list, default_value)
         for idx, value in sim_results:
             p = smi_list[idx]
@@ -425,16 +425,25 @@ def trialblazer_train(
     y,
     features,
     k,
+    M2FP_only=False,
 ):
     selector = SelectKBest(f_classif, k=k)
     X = training_set[features]
     X_new = selector.fit_transform(X, y)
-    classifier = MLPClassifier(
-        hidden_layer_sizes=(10,),
-        random_state=42,
-        learning_rate_init=0.0001,
-        max_iter=600,
-    )  # this classifier should be store somewhere so that it won't be trained every time
+    if M2FP_only:
+        classifier = MLPClassifier(
+            hidden_layer_sizes=(70,),
+            random_state=42,
+            learning_rate_init=0.0001,
+            max_iter=200,
+        ) 
+    else:
+        classifier = MLPClassifier(
+            hidden_layer_sizes=(70,),
+            random_state=42,
+            learning_rate_init=0.0001,
+            max_iter=200,
+        )  
     classifier.fit(X_new, y)
     return classifier, selector
 

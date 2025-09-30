@@ -80,15 +80,15 @@ class Trialblazer:
         if threshold is not None:
             self.threshold = threshold
         elif M2FP_only:
-            self.threshold = 0.10338700489734302
+            self.threshold = 0.12
         else:
-            self.threshold = 0.06264154114736771
+            self.threshold = 0.15
         if k is not None:
             self.k = k
         elif M2FP_only:
-            self.k = 800
+            self.k = 750
         else:
-            self.k = 900
+            self.k = 850
         self.model_url = model_url
         self.archive_type = archive_type
         self.top_folder=top_folder
@@ -267,7 +267,6 @@ class Trialblazer:
         # refinedInputFile = "/data/local/Druglikness_prediction/external_test_set/approved_testset_final_withname.csv"
 
         # refinedInputFile = self.input_file
-        # refinedInputFile =
 
         refinedOutputFolder = Path(out_folder)
         preprocess(
@@ -514,6 +513,7 @@ class Trialblazer:
                 y=self.model_data["y"],
                 features=self.model_data["features"],
                 k=self.k,
+                M2FP_only=self.M2FP_only,
             )
             if save:
                 self.save_classifier()

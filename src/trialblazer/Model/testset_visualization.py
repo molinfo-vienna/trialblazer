@@ -44,13 +44,13 @@ def plot_correlation(predict_result_toxic, predict_result_benign) -> None:
     all_mw = predict_result_toxic["mw"].tolist() + predict_result_benign["mw"].tolist()
     correlation_mw = np.corrcoef(all_mw, all_scores)[0, 1]
 
-    decision_threshold = 0.06264154114736771
+    decision_threshold = 0.15
     prediction_threshold = np.log2((1 - decision_threshold) / decision_threshold)
     plt.axhline(y=prediction_threshold, color="navy", linestyle="--", linewidth=1.5, label="Prediction threshold")
 
-    plt.text(633, 2.2, f"Threshold = {prediction_threshold:.2f}", fontsize=10, color="black")
-    plt.text(140, 32, f"r (MW) = {correlation_mw:.2f}", fontsize=10, color="black")
-    plt.text(140, 30.5, f"r (logP) = {correlation_logP:.2f}", fontsize=10, color="black")
+    plt.text(633, 1.8, f"Threshold = {prediction_threshold:.2f}", fontsize=10, color="black")
+    plt.text(140, 17.3, f"r (MW) = {correlation_mw:.2f}", fontsize=10, color="black")
+    plt.text(140, 16.3, f"r (logP) = {correlation_logP:.2f}", fontsize=10, color="black")
 
     plt.xlabel("Molecular Weight (mw)")
     plt.ylabel("PrOCTOR Score")
@@ -92,6 +92,13 @@ def SuspectedAdverseDrugEvents_count_for_eachdrug(prediction_combine) -> None:
 def SuspectedAdverseDrugEvents_count(pre_benign, pre_toxic, list_of_adverse_reaction) -> None:
     benign_not_serious_list_array, benign_serious_list_array = process_adverse_reactions(pre_benign, list_of_adverse_reaction)
     toxic_not_serious_list_array, toxic_serious_list_array = process_adverse_reactions(pre_toxic, list_of_adverse_reaction)
+    
+    benign_category_totals = benign_not_serious_list_array.sum(axis=1) + benign_serious_list_array.sum(axis=1)
+    toxic_category_totals = toxic_not_serious_list_array.sum(axis=1) + toxic_serious_list_array.sum(axis=1)
+    
+    toxic_higher_count = np.sum(toxic_category_totals > benign_category_totals)
+    percent_toxic_higher = float(toxic_higher_count / len(list_of_adverse_reaction) * 100)
+    
     category_counts_benign = {
         "Non Serious": benign_not_serious_list_array.sum(axis=1),
         "Serious": benign_serious_list_array.sum(axis=1),
@@ -100,6 +107,21 @@ def SuspectedAdverseDrugEvents_count(pre_benign, pre_toxic, list_of_adverse_reac
         "Non Serious": toxic_not_serious_list_array.sum(axis=1),
         "Serious": toxic_serious_list_array.sum(axis=1),
     }
+    
+    print("Category-wise totals and comparison:")
+    for i, category in enumerate(list_of_adverse_reaction):
+        print(f"\n{category}:")
+        print(f"Predicted Benign: Total={benign_category_totals[i]}")
+        print(f"  Non-Serious: {benign_not_serious_list_array[i].sum()}")
+        print(f"  Serious: {benign_serious_list_array[i].sum()}")
+        print(f"Predicted Toxic: Total={toxic_category_totals[i]}")
+        print(f"  Non-Serious: {toxic_not_serious_list_array[i].sum()}")
+        print(f"  Serious: {toxic_serious_list_array[i].sum()}")
+        if toxic_category_totals[i] > benign_category_totals[i]:
+            print("*** Toxic count higher than Benign ***")
+    
+    print(f"\nOut of {len(list_of_adverse_reaction)} categories, {toxic_higher_count} ({percent_toxic_higher:.1f}%) have higher counts in predicted toxic drugs")
+    
     width = 0.4
     base_color_benign = "#ff7f00"
     base_color_toxic = "#984ea3"

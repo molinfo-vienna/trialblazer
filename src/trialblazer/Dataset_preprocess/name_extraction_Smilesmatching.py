@@ -40,7 +40,7 @@ def DNER_with_spacy(DataFrame):
     test_with_spacy = []
     doc_append = []
     nlp = spacy.blank("en")
-    for row in DataFrame["replace_Name"].values():
+    for row in DataFrame["replace_Name"].values:
         if pd.notna(row):
             doc = nlp(row)
             doc_append.append(doc)
@@ -94,7 +94,7 @@ def cirpy_SmilesMatching(FailToExtract, GoToSmilesMatching):
     smiles_append = []
     name = "replace_Name"
     for df in [FailToExtract, GoToSmilesMatching]:
-        for row in df[name].values():
+        for row in df[name].values:
             try:
                 if row:
                     smiles = cirpy.resolve(row, "smiles")
@@ -129,7 +129,7 @@ def cirpy_SmilesMatching(FailToExtract, GoToSmilesMatching):
 def get_smiles_and_compounds(df, name):
     smiles_append = []
     cs_append = []
-    for row in df[name].values():
+    for row in df[name].values:
         if pd.notna(row):
             cs = pcp.get_compounds(row, "name")
             if len(cs) == 1:
@@ -175,7 +175,7 @@ def Extract_drug_name(input_df, input_name):
     input_df["drugbank_id"] = drugbank_id
     name_NeedToExcluded = ["antibody", "multi-drugs", "-"]
     input_df = input_df[
-        (input_df["replace_Name"].str.startswith(tuple(name_NeedToExcluded)) is False)
+        ~input_df["replace_Name"].str.startswith(tuple(name_NeedToExcluded))
     ]
     FailToExtract, GoToSmilesMatching = select_drugs_GoToSecondRound(input_df)
     return FailToExtract, GoToSmilesMatching
