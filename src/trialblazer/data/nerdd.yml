@@ -6,16 +6,16 @@ module:
   logo: !image logo.svg
   logo_caption: Toxicity risk prediction in late-stage drug development
   example_smiles: CCOC(=O)N1CCN(CC1)C2=C(C(=O)C2=O)N3CCN(CC3)C4=CC=C(C=C4)OC
-  batch_size: 100
+  batch_size: 10
 
   title: Predicting Toxicity Risks in Late-Stage Drug Development
   description: |
     Trialblazer is a machine learning classifier based on multilayer perceptrons (MLPs) for the
     prediction of compounds with a potentially increased risk of late-stage toxicity, i.e. failures
     during clinical studies or market withdrawal due to toxicity reasons. The model is trained on a
-    dataset compiled from public sources, comprising 1,610 benign drugs and 246 drug candidates that
-    failed or were withdrawn due to toxicity. Trialblazer's predictions serve as an indicator tool
-    to flag compounds with an increased potential risk of toxicity early in the development
+    dataset compiled from public sources, comprising  1,603 benign drugs and 238 drug candidates
+    that failed or were withdrawn due to toxicity. Trialblazer's predictions serve as an indicator
+    tool to flag compounds with an increased potential risk of toxicity early in the development
     pipeline.
 
   partners:
@@ -25,7 +25,7 @@ module:
 
   publications:
     - title: |
-        The name of the publication
+        Trialblazer: A Chemistry-Focused Predictor of Toxicity Risks in Late-Stage Drug Development
       authors:
         - first_name: Huanni
           last_name: Zhang
@@ -43,6 +43,12 @@ module:
   about: |
     ## About Trialblazer
     ... add documentation here
+
+  job_parameters:
+    - name: fingerprints_only
+      visible_name: Prediction are based on molecular fingerprints only
+      type: bool
+      default: True
 
   result_properties:
     - name: prediction
