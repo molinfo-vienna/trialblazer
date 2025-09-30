@@ -22,21 +22,26 @@ class TrialblazerModel(Model):
             preprocessing_steps=[
                 Sanitize(),
                 FilterByWeight(
-                    min_weight=250,
-                    max_weight=900,
+                    min_weight=150,
+                    max_weight=850,
                     remove_invalid_molecules=True,
                 ),
             ],
         )
 
         # preload model (this takes ~30s so we save a lot of time later)
-        self.tb = Trialblazer()
-        self.tb.load_model()
+        self._models = {b: Trialblazer(M2FP_only=b) for b in (True, False)}
+        for model in self._models.values():
+            model.load_model()
 
     def _predict_mols(
         self,
         mols: list[Mol],
+        fingerprints_only: bool = True,
     ) -> Iterable[dict]:
+        # select model
+        tb = self._models[fingerprints_only]
+
         # Trialblazer accepts input only as smiles
         # -> convert all molecules to smiles
         smiles = [MolToSmiles(mol) for mol in mols]
@@ -45,17 +50,17 @@ class TrialblazerModel(Model):
         # Note: ids cannot be numbers, because trialblazer will throw an error
         ids = [f"mol_{i}" for i in range(len(smiles))]
 
-        # we assign the input dataset directly, because self.tb.import_smiles
-        # and self.tb.import_smiles_df have undesired side effects
-        self.tb.smiles = pd.DataFrame({"SMILES": smiles, "chembl_id": ids})
+        # we assign the input dataset directly, because tb.import_smiles
+        # and tb.import_smiles_df have undesired side effects
+        tb.smiles = pd.DataFrame({"SMILES": smiles, "chembl_id": ids})
 
         # run the model
         with TemporaryDirectory() as tmpdir:
-            self.tb.prepare_testset(out_folder=tmpdir, force=True)
-            self.tb.run_model()
+            tb.prepare_testset(out_folder=tmpdir, force=True)
+            tb.run_model()
 
         # get the results
-        df = self.tb.get_dataframe()
+        df = tb.get_dataframe()
 
         for row in df.itertuples(index=False):
             yield {
