@@ -11,12 +11,12 @@ module:
   title: Predicting Toxicity Risks in Late-Stage Drug Development
   description: |
     Trialblazer is a machine learning classifier based on multilayer perceptrons (MLPs) for the
-    prediction of compounds with a potentially increased risk of late-stage toxicity, i.e. failures
-    during clinical studies or market withdrawal due to toxicity reasons. The model is trained on a
-    dataset compiled from public sources, comprising  1,603 benign drugs and 238 drug candidates
-    that failed or were withdrawn due to toxicity. Trialblazer's predictions serve as an indicator
-    tool to flag compounds with an increased potential risk of toxicity early in the development
-    pipeline.
+    prediction of compounds with a potentially increased risk of late-stage toxicity leading to
+    failures during clinical studies or market withdrawal due to toxicity reasons. The model is
+    trained on a dataset compiled from public sources, comprising  1,603 benign drugs and 238 drug
+    candidates that failed or were withdrawn due to toxicity. The model does not require prior
+    knowledge of the compound's specific biological target(s), making it particularly useful for
+    profiling innovative compounds for which such information is typically unavailable.
 
   partners:
     - name: University of Vienna
@@ -46,9 +46,9 @@ module:
 
   job_parameters:
     - name: fingerprints_only
-      visible_name: Prediction are based on molecular fingerprints only
+      visible_name: Use model based on fingerprint descriptors only
       type: bool
-      default: True
+      default: false
 
   result_properties:
     - name: prediction
@@ -99,13 +99,11 @@ module:
       type: float
       sortable: True
       # no idea what range and colors makes sense here
-      # Note: everything above max value will be colored the same
-      # (same goes for min value)
       color_palette:
         type: sequential
         domain:
           - 0
-          - 5
+          - 10
         range:
           - neutral
           - positive
