@@ -406,8 +406,8 @@ def pairwise_tanimoto_similarity_closest_distance(smi_list, query_set_smi_list, 
         results.append({"smi": my_smi, "dict": sim_dict})
     temp_save = pd.DataFrame(results)
     temp_save[smi_list] = [list(value_1.values()) for value_1 in temp_save["dict"]]
-    temp_save["closest_distance"] = temp_save[smi_list].max(axis=1)
-    temp_save["closest_smi"] = temp_save[smi_list].idxmax(axis=1)
+    temp_save["closest_distance_to_training"] = temp_save[smi_list].max(axis=1)
+    temp_save["closest_training_smi"] = temp_save[smi_list].idxmax(axis=1)
     return temp_save.drop(columns=["dict"])
 
 def _similairty_score(reference, X, *, n_neighbors):
@@ -519,14 +519,14 @@ def trialblazer_func(
     # prediction output
     predict_result_sim = predict_result_sim.rename(columns={"SmilesForDropDu": "smi"})
     prediction_output = predict_result_sim.merge(
-        similarity_closest_distance[["smi", "closest_distance", "closest_smi"]],
+        similarity_closest_distance[["smi", "closest_distance_to_training", "closest_training_smi"]],
         how="left",
         on="smi",
     )
     prediction_output["prediction"] = prediction_output["prediction"].map(
         {0: "benign", 1: "toxic"},
     )
-    prediction_output["K_nearest_neighbor_score"] = K_nearest_neighbor_score
+    prediction_output["3_nearest_neighbor_score"] = K_nearest_neighbor_score
     # return (
     #     predict_result_sim,
     #     similarity_closest_distance[["smi", "closest_distance", "closest_smi"]],
