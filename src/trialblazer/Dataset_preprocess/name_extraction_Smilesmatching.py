@@ -40,7 +40,7 @@ def DNER_with_spacy(DataFrame):
     test_with_spacy = []
     doc_append = []
     nlp = spacy.blank("en")
-    for row in DataFrame["replace_Name"].values:
+    for row in DataFrame["replaced_Name"].values:
         if pd.notna(row):
             doc = nlp(row)
             doc_append.append(doc)
@@ -92,7 +92,7 @@ def select_drugs_GoToSecondRound(processed_dataframe):
 
 def cirpy_SmilesMatching(FailToExtract, GoToSmilesMatching):
     smiles_append = []
-    name = "replace_Name"
+    name = "replaced_Name"
     for df in [FailToExtract, GoToSmilesMatching]:
         for row in df[name].values:
             try:
@@ -155,7 +155,7 @@ def pubchempy_SmilesMatching(GoToPubchempy, name):
     pubchempy_result_1 = GoToPubchempy.loc[~GoToPubchempy["SMILES"].isna()]
     GoTo_NextRound = GoToPubchempy.loc[GoToPubchempy["SMILES"].isna()]
 
-    name = "replace_Name"
+    name = "replaced_Name"
     cs_append, smiles_append = get_smiles_and_compounds(GoTo_NextRound, name)
     GoTo_NextRound["matched_compound"] = cs_append
     GoTo_NextRound["SMILES"] = smiles_append
@@ -167,7 +167,7 @@ def pubchempy_SmilesMatching(GoToPubchempy, name):
 
 
 def Extract_drug_name(input_df, input_name):
-    input_df["replace_Name"] = input_df[input_name].apply(replace_text)
+    input_df["replaced_Name"] = input_df[input_name].apply(replace_text)
     input_df["DNER_with_spacy"] = DNER_with_spacy(input_df)
     name, synonyms, drugbank_id = extract_results(input_df["DNER_with_spacy"])
     input_df["name_to_use"] = name
@@ -175,7 +175,7 @@ def Extract_drug_name(input_df, input_name):
     input_df["drugbank_id"] = drugbank_id
     name_NeedToExcluded = ["antibody", "multi-drugs", "-"]
     input_df = input_df[
-        ~input_df["replace_Name"].str.startswith(tuple(name_NeedToExcluded))
+        ~input_df["replaced_Name"].str.startswith(tuple(name_NeedToExcluded))
     ]
     FailToExtract, GoToSmilesMatching = select_drugs_GoToSecondRound(input_df)
     return FailToExtract, GoToSmilesMatching
