@@ -47,9 +47,9 @@ def MLP_simulation_test(X_new,y):
 def MLP_decision_threshold_optimization(X, y, opt_num_feature):
     selector = SelectKBest(f_classif, k=opt_num_feature)
     X_new = selector.fit_transform(X, y)
-    cv = StratifiedKFold(n_splits=70)
+    cv = StratifiedKFold(n_splits=10)
     classifier = MLPClassifier(
-        hidden_layer_sizes=(10,),
+        hidden_layer_sizes=(70,),
         random_state=42,
         learning_rate_init=0.0001,
         max_iter=200,
@@ -213,21 +213,12 @@ def RF_cv(X, y, opt_num_feature="all") -> None:
     selector = SelectKBest(f_classif, k=opt_num_feature)
     X_new = selector.fit_transform(X, y)
     cv = StratifiedKFold(n_splits=10)
-    # if opt_num_feature == "all":
-    #     classifier = RandomForestClassifier(
-    #         class_weight="balanced",
-    #         max_features="sqrt",
-    #         random_state=42,
-    #     )
-    # else:
-    #     classifier = RandomForestClassifier(
-    #         n_estimators=200,
-    #         class_weight="balanced",
-    #         max_features="sqrt",
-    #         min_samples_split=2,
-    #         random_state=42,
-    #         max_depth=30,
-    #     )
+    if opt_num_feature == "all":
+        classifier = RandomForestClassifier(
+            class_weight="balanced",
+            max_features="sqrt",
+            random_state=42,
+        )
     tprs = []
     aucs = []
     MCCs = []
@@ -419,6 +410,28 @@ def pairwise_tanimoto_similarity_closest_distance(smi_list, query_set_smi_list, 
     temp_save["closest_smi"] = temp_save[smi_list].idxmax(axis=1)
     return temp_save.drop(columns=["dict"])
 
+def _similairty_score(reference, X, *, n_neighbors):
+    similarity_matrix = _tanimoto_similarity_matrix(reference, X)
+
+    return np.mean(
+        np.sort(similarity_matrix, axis=0)[-n_neighbors:],
+        axis=0,
+    )
+
+def _tanimoto_similarity_matrix(A, B):
+    A = np.asarray(A)
+    B = np.asarray(B)
+    intersection = np.matmul(A, B.T)
+    A_square_norm = np.sum(A**2, axis=1)
+    B_square_norm = np.sum(B**2, axis=1)
+    union = A_square_norm[:, None] + B_square_norm[None, :] - intersection
+
+    return np.divide(
+        intersection,
+        union,
+        out=np.zeros_like(intersection, dtype=np.float64),
+        where=union != 0,
+    )
 
 def trialblazer_train(
     training_set,
@@ -494,12 +507,16 @@ def trialblazer_func(
         predict_result_sim = predict_result_sim_remove_multi
 
     # Applicability domain
-
+    training_arrary = selector.transform(training_set[X_columns])
+    K_nearest_neighbor_score = _similairty_score(training_arrary, X_test_ANO, n_neighbors = 3)
+    predict_result_sim["K_nearest_neighbor_score"] = K_nearest_neighbor_score
+    
     similarity_closest_distance = pairwise_tanimoto_similarity_closest_distance(
         list(training_set["SmilesForDropDu"]),
         list(predict_result_sim["SmilesForDropDu"]),
         training_fpe,
     )
+    
     # prediction output
     predict_result_sim = predict_result_sim.rename(columns={"SmilesForDropDu": "smi"})
     prediction_output = predict_result_sim.merge(
@@ -510,7 +527,7 @@ def trialblazer_func(
     prediction_output["prediction"] = prediction_output["prediction"].map(
         {0: "benign", 1: "toxic"},
     )
-
+    prediction_output["K_nearest_neighbor_score"] = K_nearest_neighbor_score
     # return (
     #     predict_result_sim,
     #     similarity_closest_distance[["smi", "closest_distance", "closest_smi"]],
