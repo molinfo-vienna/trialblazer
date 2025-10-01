@@ -1,13 +1,13 @@
 from __future__ import annotations
-
 from tempfile import TemporaryDirectory
-from typing import TYPE_CHECKING, Iterable
-
+from typing import TYPE_CHECKING
+from typing import Iterable
 import pandas as pd
 from nerdd_module import Model
-from nerdd_module.preprocessing import FilterByWeight, Sanitize
-from rdkit.Chem import MolFromSmiles, MolToSmiles
-
+from nerdd_module.preprocessing import FilterByWeight
+from nerdd_module.preprocessing import Sanitize
+from rdkit.Chem import MolFromSmiles
+from rdkit.Chem import MolToSmiles
 from trialblazer.trialblazer import Trialblazer
 
 if TYPE_CHECKING:
@@ -30,14 +30,14 @@ class TrialblazerModel(Model):
         )
 
         # preload model (this takes ~30s so we save a lot of time later)
-        self._models = {b: Trialblazer(M2FP_only=b) for b in (True, False)}
+        self._models = {b: Trialblazer(M2FP_only=b) for b in [False, True]}
         for model in self._models.values():
             model.load_model()
 
     def _predict_mols(
         self,
         mols: list[Mol],
-        fingerprints_only: bool = True,
+        fingerprints_only: bool = False,
     ) -> Iterable[dict]:
         # select model
         tb = self._models[fingerprints_only]
