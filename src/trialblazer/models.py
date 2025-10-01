@@ -419,8 +419,8 @@ def _similairty_score(reference, X, *, n_neighbors):
     )
 
 def _tanimoto_similarity_matrix(A, B):
-    A = np.asarray(A)
-    B = np.asarray(B)
+    A = np.asarray(A, dtype=np.float64)
+    B = np.asarray(B, dtype=np.float64)
     intersection = np.matmul(A, B.T)
     A_square_norm = np.sum(A**2, axis=1)
     B_square_norm = np.sum(B**2, axis=1)
@@ -509,7 +509,6 @@ def trialblazer_func(
     # Applicability domain
     training_arrary = selector.transform(training_set[X_columns])
     K_nearest_neighbor_score = _similairty_score(training_arrary, X_test_ANO, n_neighbors = 3)
-    predict_result_sim["K_nearest_neighbor_score"] = K_nearest_neighbor_score
     
     similarity_closest_distance = pairwise_tanimoto_similarity_closest_distance(
         list(training_set["SmilesForDropDu"]),
