@@ -47,12 +47,11 @@ class TrialblazerModel(Model):
         smiles = [MolToSmiles(mol) for mol in mols]
 
         # use ids to identify molecules later
-        # Note: ids cannot be numbers, because trialblazer will throw an error
-        ids = [f"mol_{i}" for i in range(len(smiles))]
+        ids = list(range(len(smiles)))
 
         # we assign the input dataset directly, because tb.import_smiles
         # and tb.import_smiles_df have undesired side effects
-        tb.smiles = pd.DataFrame({"SMILES": smiles, "chembl_id": ids})
+        tb.smiles = pd.DataFrame({"SMILES": smiles, "your_id": ids})
 
         # run the model
         with TemporaryDirectory() as tmpdir:
@@ -64,10 +63,10 @@ class TrialblazerModel(Model):
 
         for row in df.itertuples(index=False):
             yield {
-                "mol_id": int(row.id[len("mol_") :]),
+                "mol_id": int(row.id),
                 "prediction": row.prediction,
-                "pred_prob_positive": row.pred_prob_positive,
-                "pred_prob_negative": row.pred_prob_negative,
+                "pred_prob_toxic": row.pred_prob_toxic,
+                "pred_prob_benign": row.pred_prob_benign,
                 "PrOCTOR_score": row.PrOCTOR_score,
                 # itertuples automatically renames column names that
                 # starts with a number

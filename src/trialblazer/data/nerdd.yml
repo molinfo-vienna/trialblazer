@@ -142,7 +142,7 @@ module:
           - positive
           - negative
 
-    - name: pred_prob_positive
+    - name: pred_prob_toxic
       visible_name: Probability (toxic)
       visible: True
       type: float
@@ -156,7 +156,7 @@ module:
           - neutral
           - negative
 
-    - name: pred_prob_negative
+    - name: pred_prob_benign
       visible_name: Probability (benign)
       visible: False
       type: float
