@@ -2,7 +2,7 @@ module:
   rank: 9
   name: trialblazer
   visible_name: Trialblazer
-  visible: False
+  visible: True
   logo: !image logo.svg
   logo_caption: Toxicity risk prediction in late-stage drug development
   example_smiles: CCOC(=O)N1CCN(CC1)C2=C(C(=O)C2=O)N3CCN(CC3)C4=CC=C(C=C4)OC
@@ -41,8 +41,85 @@ module:
       doi: 10.26434/chemrxiv-2025-8jfc3
 
   about: |
-    ## About Trialblazer
-    ... add documentation here
+    ## About Trailblazer
+
+    Trialblazer is a machine learning classifier based on multilayer perceptrons (MLPs) for the
+    prediction of compounds with a potentially increased risk of late-stage toxicity. Such risks
+    often lead to failures during clinical studies or market withdrawal due to safety concerns. The
+    model is trained on a curated dataset compiled from public sources, consisting of 1,603 benign
+    drugs and 238 drug candidates that failed or were withdrawn due to toxicity. Trialblazer
+    operates independently of prior knowledge about the compound's specific biological targets,
+    making it particularly useful for profiling innovative compounds for which such information is
+    typically unavailable. Two distinct prediction modes are available to cover different use cases
+    (see below).
+
+    ### Usage
+
+    #### Input
+
+    ##### Molecules
+
+    You can provide a single molecule by either entering a SMILES string directly or by drawing it
+    in the JSME Molecule Editor. You can also upload one or multiple files containing molecule
+    representations. Supported file formats are SMILES, SDF and InChI as well as compressed files
+    (e.g. zip, tar.gz) containing files with representations.
+
+    ##### Prediction modes
+
+    Trialblazer offers two prediction models:
+
+    **Default mode (M2FPs + PBFPs)**: Trialblazer predicts the potential toxicity of compounds based
+    on a combined molecular representation that integrates Morgan2 fingerprints (M2FPs) and
+    predicted bioactivity fingerprints (PBFPs). This combination generally yields the highest
+    predictive performance and is recommended for most use cases.
+
+    **Fingerprint-only mode (M2FPs)**: By selecting the option “Use model based on fingerprint
+    descriptors only”, Trialblazer will base its predictions solely on Morgan2 fingerprints (M2FPs).
+    This mode can be useful when users wish to restrict the model to purely structure-based
+    features.
+
+    ##### Starting the calculation
+
+    By pressing the submit button, the calculation will start if a valid input has been provided;
+    otherwise, an error message will be shown. You will then be forwarded to the results page, and a
+    permanent link is shown that you can use to obtain your results once the calculation is done.
+
+    #### Output
+
+    The results of the calculation will be displayed as a color-coded table, indicating that
+    compounds considered toxic are shown in red and benign in blue. Users can download the results
+    as a .csv file for later use. Results will be deleted permanently after 60 days or as soon as
+    the user presses the "Delete" button on the results page.
+
+    ##### Similarity indicators
+
+    To assess the reliability of individual predictions, Trialblazer provides two complementary
+    similarity indicators.
+
+    **Minimum similarity to the training set:** Quantifies the structural similarity between the
+    compound of interest and its closest neighbor in the training set. The similarity is measured
+    using the Tanimoto Coefficient (TC) derived from Morgan fingerprints (radius = 2, length = 2048
+    bits).
+
+    **Feature set similarity:** Measures how closely a compound resembles the overall training data
+    by calculating the average similarity to its three most similar feature sets. For both
+    indicators, higher values indicate greater similarity to the training data and therefore higher
+    reliability of the corresponding prediction.
+
+    ##### Explanation of the output columns of the results
+
+    Table 1. Explanation of the output columns.
+
+    | Column Name               | Description                                                                                       |
+    |---------------------------|---------------------------------------------------------------------------------------------------|
+    | Name                      | Unique identifier assigned to each submitted molecule.                                            |
+    | Preprocessed Structure    | The molecular structure after SMILES preprossing.                                                 |
+    | Prediction                | Classification result indicating whether the compound is predicted to be __toxic__ or __benign__. |
+    | Probability (toxic)       | Predicted probability that the compound is toxic, as estimated by the model.                      |
+    | PrOCTOR score             | The PrOCTOR score calculated for the compound.                                                    |
+    | 3-Nearest Neighbor Score  | Average similarity of the compound to its three most similar feature sets in the training data.   |
+    | Mol.sim. to training set  | Tanimoto similarity between the compound and its most similar molecule in the training set.       |
+    | Closest training molecule | 2D structure of the most similar molecule from the training set.                                  |
 
   job_parameters:
     - name: fingerprints_only
