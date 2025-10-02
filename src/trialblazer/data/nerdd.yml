@@ -68,12 +68,12 @@ module:
 
     Trialblazer offers two prediction models:
 
-    **Default mode (M2FPs + PBFPs)**: Trialblazer predicts the potential toxicity of compounds based
-    on a combined molecular representation that integrates Morgan2 fingerprints (M2FPs) and
+    * **Default mode (M2FPs + PBFPs):** Trialblazer predicts the potential toxicity of compounds
+    based on a combined molecular representation that integrates Morgan2 fingerprints (M2FPs) and
     predicted bioactivity fingerprints (PBFPs). This combination generally yields the highest
-    predictive performance and is recommended for most use cases.
+    predictive performance and is recommended for most use cases. 
 
-    **Fingerprint-only mode (M2FPs)**: By selecting the option “Use model based on fingerprint
+    * **Fingerprint-only mode (M2FPs):** By selecting the option “Use model based on fingerprint
     descriptors only”, Trialblazer will base its predictions solely on Morgan2 fingerprints (M2FPs).
     This mode can be useful when users wish to restrict the model to purely structure-based
     features.
@@ -96,19 +96,19 @@ module:
     To assess the reliability of individual predictions, Trialblazer provides two complementary
     similarity indicators.
 
-    **Minimum similarity to the training set:** Quantifies the structural similarity between the
+    * **Minimum similarity to the training set:** Quantifies the structural similarity between the
     compound of interest and its closest neighbor in the training set. The similarity is measured
     using the Tanimoto Coefficient (TC) derived from Morgan fingerprints (radius = 2, length = 2048
     bits).
 
-    **Feature set similarity:** Measures how closely a compound resembles the overall training data
-    by calculating the average similarity to its three most similar feature sets. For both
+    * **Feature set similarity:** Measures how closely a compound resembles the overall training
+    data by calculating the average similarity to its three most similar feature sets. For both
     indicators, higher values indicate greater similarity to the training data and therefore higher
     reliability of the corresponding prediction.
 
     ##### Explanation of the output columns of the results
 
-    Table 1. Explanation of the output columns.
+    **Table 1.** Explanation of the output columns.
 
     | Column Name               | Description                                                                                       |
     |---------------------------|---------------------------------------------------------------------------------------------------|
