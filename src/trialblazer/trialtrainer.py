@@ -64,7 +64,7 @@ INNER JOIN (
 
     def __init__(
         self,
-        chembl_version=36,
+        chembl_version=34,
         training_set=None,
         model_folder=None,
         extra_test_set=None,
