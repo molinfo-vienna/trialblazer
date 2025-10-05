@@ -96,7 +96,7 @@ module:
     To assess the reliability of individual predictions, Trialblazer provides two complementary
     similarity indicators.
 
-    * **Minimum similarity to the training set:** Quantifies the structural similarity between the
+    * **Maximum similarity to the training set:** Quantifies the structural similarity between the
     compound of interest and its closest neighbor in the training set. The similarity is measured
     using the Tanimoto Coefficient (TC) derived from Morgan fingerprints (radius = 2, length = 2048
     bits).
