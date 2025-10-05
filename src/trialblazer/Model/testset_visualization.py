@@ -177,4 +177,3 @@ def process_adverse_reactions(prediction, list_of_adverse_reaction):
     not_serious_list_array = np.array(not_serious_list)
     serious_list_array = np.array(serious_list)
     return not_serious_list_array, serious_list_array
-

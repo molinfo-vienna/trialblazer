@@ -410,7 +410,7 @@ def pairwise_tanimoto_similarity_closest_distance(smi_list, query_set_smi_list, 
     temp_save["closest_training_smi"] = temp_save[smi_list].idxmax(axis=1)
     return temp_save.drop(columns=["dict"])
 
-def _similairty_score(reference, X, *, n_neighbors):
+def _similarity_score(reference, X, *, n_neighbors):
     similarity_matrix = _tanimoto_similarity_matrix(reference, X)
 
     return np.mean(
@@ -506,20 +506,25 @@ def trialblazer_func(
         )
         predict_result_sim = predict_result_sim_remove_multi
 
-    # Applicability domain
-    training_arrary = selector.transform(training_set[X_columns])
-    K_nearest_neighbor_score = _similairty_score(training_arrary, X_test_ANO, n_neighbors = 3)
+    # Applicability domain 
+    training_array = selector.transform(training_set[X_columns])
+    # Get input features X_test from predict_result_sim by excluding non-feature columns
+    if remove_MultiComponent_cpd:
+        X_test = X_test_ANO[predict_result_sim.index]
+    else:
+        X_test = X_test_ANO
+    
+    K_nearest_neighbor_score = _similarity_score(training_array, X_test,n_neighbors=3)
     
     similarity_closest_distance = pairwise_tanimoto_similarity_closest_distance(
         list(training_set["SmilesForDropDu"]),
-        list(predict_result_sim["SmilesForDropDu"]),
+        list(predict_result_sim["SmilesForDropDu"]), 
         training_fpe,
     )
-    
     # prediction output
     predict_result_sim = predict_result_sim.rename(columns={"SmilesForDropDu": "smi"})
     prediction_output = predict_result_sim.merge(
-        similarity_closest_distance[["smi", "closest_distance_to_training", "closest_training_smi"]],
+        similarity_closest_distance[["smi", "closest_distance_to_training", "closest_training_smi"]], # Column names should match
         how="left",
         on="smi",
     )
@@ -527,10 +532,6 @@ def trialblazer_func(
         {0: "benign", 1: "toxic"},
     )
     prediction_output["3_nearest_neighbor_score"] = K_nearest_neighbor_score
-    # return (
-    #     predict_result_sim,
-    #     similarity_closest_distance[["smi", "closest_distance", "closest_smi"]],
-    # )
     return prediction_output
 
 
