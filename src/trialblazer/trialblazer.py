@@ -44,6 +44,11 @@ from .Descriptor_calculation.process_target_features import (
 from .models import trialblazer_func
 from .models import trialblazer_train
 
+from rdkit import RDLogger
+import warnings
+
+RDLogger.DisableLog('rdApp.*')
+warnings.filterwarnings('ignore')
 logger = logging.getLogger(__name__).addHandler(logging.NullHandler())
 
 
