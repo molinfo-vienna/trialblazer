@@ -48,7 +48,7 @@ from rdkit import RDLogger
 import warnings
 
 RDLogger.DisableLog('rdApp.*')
-warnings.filterwarnings('ignore')
+warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 logger = logging.getLogger(__name__).addHandler(logging.NullHandler())
 
 

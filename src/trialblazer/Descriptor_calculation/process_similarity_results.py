@@ -4,6 +4,8 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+import warnings
+warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
 
 def separate_similarity_results(

@@ -7,6 +7,10 @@ from .similarity_based_target_calculation import (
     tanimoto_similarity_calculation,
 )
 from .similarity_based_target_calculation import target_features_preprocess
+import warnings
+import pandas as pd
+warnings.filterwarnings('ignore')
+warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
 
 def process_target_features(
