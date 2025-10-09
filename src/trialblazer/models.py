@@ -12,6 +12,7 @@ from sklearn.feature_selection import f_classif
 from sklearn.metrics import ConfusionMatrixDisplay
 from sklearn.metrics import RocCurveDisplay
 from sklearn.metrics import auc
+from sklearn.metrics import roc_curve
 from sklearn.metrics import balanced_accuracy_score
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import matthews_corrcoef
@@ -90,18 +91,15 @@ def MLP_cv(X, y, opt_num_feature="all", threshold=None) -> None:
     )
     mean_fpr = np.linspace(0, 1, 100)
     fig, ax = plt.subplots()
-    fig1, ax1 = plt.subplots()
 
     for i, (train, test) in enumerate(cv.split(X_new, y)):
         classifier.fit(X_new[train], y[train])
-        loss_curve = classifier.loss_curve_
-        iter = classifier.n_iter_
 
         y_prob = classifier.predict_proba(X_new[test])[:, 1]
 
-        if threshold is None:  # Default MLP
+        if threshold is None:  
             y_pred_opt = classifier.predict(X_new[test])
-        else:  # Optimized MLP with custom threshold
+        else:  
             y_pred_opt = (y_prob >= threshold).astype(int)
 
         mcc = matthews_corrcoef(y[test], y_pred_opt)
@@ -115,34 +113,14 @@ def MLP_cv(X, y, opt_num_feature="all", threshold=None) -> None:
         cms.append(cm)
         recalls.append(rec)
         precisions.append(prec)
-        # ROC curve
-        viz = RocCurveDisplay.from_estimator(
-            classifier,
-            X_new[test],
-            y[test],
-            name=f"ROC fold {i}",
-            alpha=0.3,
-            lw=1,
-            ax=ax,
-        )
-        # loss function curve
-        iteration = np.linspace(0, iter, iter)
-        ax1.plot(
-            iteration,
-            loss_curve,
-            color="mediumslateblue",
-            lw=1,
-            alpha=0.5,
-        )
-        interp_tpr = np.interp(mean_fpr, viz.fpr, viz.tpr)
+        
+        fpr, tpr, _ = roc_curve(y[test], y_prob)
+        roc_auc = auc(fpr, tpr)
+        
+        interp_tpr = np.interp(mean_fpr, fpr, tpr)
         interp_tpr[0] = 0.0
         tprs.append(interp_tpr)
-        aucs.append(viz.roc_auc)
-        MCCs.append(mcc)
-        cms.append(cm)
-        baccs.append(bacc)
-        recalls.append(rec)
-        precisions.append(prec)
+        aucs.append(roc_auc)
 
     mean_tpr = np.mean(tprs, axis=0)
     mean_tpr[-1] = 1.0
@@ -154,19 +132,13 @@ def MLP_cv(X, y, opt_num_feature="all", threshold=None) -> None:
     mean_cms = np.mean(stacked_matrices, axis=0)
     mean_cms = np.round(mean_cms).astype(
         int,
-    )  # get the integer of the mean number
-    np.mean(baccs)
-    np.std(baccs)
-    np.mean(recalls)
-    np.std(recalls)
-    np.mean(precisions)
-    np.std(precisions)
-
-    ax1.set(
-        xlabel="Iteration",
-        ylabel="Loss",
-        title="Loss function curve",
-    )
+    )  
+    print(f"Mean MCC: {np.mean(MCCs):.3f} ± {np.std(MCCs):.3f}")
+    print(f"Mean balanced accuracy: {np.mean(baccs):.3f} ± {np.std(baccs):.3f}")
+    print(f"Mean recall: {np.mean(recalls):.3f} ± {np.std(recalls):.3f}")
+    print(f"Mean precision: {np.mean(precisions):.3f} ± {np.std(precisions):.3f}")
+    print(f"Mean AUC: {mean_auc:.3f} ± {std_auc:.3f}")
+    
     ax.plot(
         [0, 1],
         [0, 1],
@@ -174,15 +146,15 @@ def MLP_cv(X, y, opt_num_feature="all", threshold=None) -> None:
         lw=2,
         color="r",
         label="Chance",
-        alpha=0.8,
+        alpha=0.5,
     )
     ax.plot(
         mean_fpr,
         mean_tpr,
-        color="b",
+        color="navy",
         label=rf"Mean ROC (AUC = {mean_auc:0.2f} $\pm$ {std_auc:0.2f})",
         lw=2,
-        alpha=0.8,
+        alpha=1,
     )
     std_tpr = np.std(tprs, axis=0)
     tprs_upper = np.minimum(mean_tpr + std_tpr, 1)
@@ -194,7 +166,6 @@ def MLP_cv(X, y, opt_num_feature="all", threshold=None) -> None:
         tprs_upper,
         color="grey",
         alpha=0.2,
-        label=r"$\pm$ 1 std. dev.",
     )
     ax.set(
         xlim=[-0.05, 1.05],
@@ -202,11 +173,15 @@ def MLP_cv(X, y, opt_num_feature="all", threshold=None) -> None:
         title="ROC Curve",
     )
     ax.legend(loc="lower right")
+
     disp = ConfusionMatrixDisplay(
         confusion_matrix=mean_cms,
-        display_labels=classifier.classes_,
+        display_labels=classifier.classes_
     )
-    disp.plot(xticks_rotation="vertical")
+    disp.plot(
+        cmap=plt.cm.Blues,
+        xticks_rotation="vertical"
+    )
 
 
 def RF_cv(X, y, opt_num_feature="all") -> None:
@@ -406,8 +381,9 @@ def pairwise_tanimoto_similarity_closest_distance(smi_list, query_set_smi_list, 
         results.append({"smi": my_smi, "dict": sim_dict})
     temp_save = pd.DataFrame(results)
     temp_save[smi_list] = [list(value_1.values()) for value_1 in temp_save["dict"]]
-    temp_save["closest_distance_to_training"] = temp_save[smi_list].max(axis=1)
+    temp_save["closest_distance_to_training"] = temp_save[smi_list].max(axis=1).round(4)
     temp_save["closest_training_smi"] = temp_save[smi_list].idxmax(axis=1)
+
     return temp_save.drop(columns=["dict"])
 
 def _similarity_score(reference, X, *, n_neighbors):
@@ -487,7 +463,7 @@ def trialblazer_func(
     # PrOCTOR score
     odd = test_set_aligned.pred_prob_negative / test_set_aligned.pred_prob_positive
     PrOCTOR_score = np.log2(odd)
-    test_set_aligned["PrOCTOR_score"] = PrOCTOR_score
+    test_set_aligned["PrOCTOR_score"] = PrOCTOR_score.round(2)
     test_set_aligned["PrOCTOR_score"] = test_set_aligned["PrOCTOR_score"].apply(
         lambda x: f"{x:.3f}",
     )
@@ -531,7 +507,7 @@ def trialblazer_func(
     prediction_output["prediction"] = prediction_output["prediction"].map(
         {0: "benign", 1: "toxic"},
     )
-    prediction_output["3_nearest_neighbor_score"] = K_nearest_neighbor_score
+    prediction_output["3_nearest_neighbor_score"] = K_nearest_neighbor_score.round(4)
     return prediction_output
 
 
