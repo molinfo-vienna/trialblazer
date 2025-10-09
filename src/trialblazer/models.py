@@ -465,7 +465,7 @@ def trialblazer_func(
     PrOCTOR_score = np.log2(odd)
     test_set_aligned["PrOCTOR_score"] = PrOCTOR_score.round(2)
     test_set_aligned["PrOCTOR_score"] = test_set_aligned["PrOCTOR_score"].apply(
-        lambda x: f"{x:.3f}",
+        lambda x: f"{x:.2f}",
     )
     predict_result_sim = test_set_aligned.iloc[:, -6:]
     predict_result_sim["PrOCTOR_score"] = predict_result_sim["PrOCTOR_score"].astype(
