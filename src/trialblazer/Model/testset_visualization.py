@@ -7,12 +7,24 @@ from matplotlib import cm
 
 def plot_score_distribution_with_significance(data, p_values) -> None:
     custom_palette = {
-        "Benign compounds\nTraining set": "#ff7f00",
-        "Toxic compounds\nTraining set": "#984ea3",
+        "Benign compounds\nTraining set": "#8ecae6",
+        "Toxic compounds\nTraining set": "#fb8500",
         "Benign compounds\nTest set": "orangered",
     }
     plt.figure(figsize=(6, 6))
-    sns.violinplot(x="Category", y="Value", data=data, palette=custom_palette, inner="quartile")
+    
+    alphas = [0.8, 0.8, 1] 
+    for i, (cat, alpha) in enumerate(zip(data["Category"].unique(), alphas)):
+        sns.violinplot(
+            data=data[data["Category"]==cat],
+            x="Category", 
+            y="Value",
+            hue="Category",
+            legend=False,
+            inner="quartile", 
+            alpha=alpha,
+            palette={cat: custom_palette[cat]}
+        )
     y_max = data["Value"].max() + 0.5
     step = 5
     for i, ((cat1, cat2), p) in enumerate(p_values.items()):
@@ -21,6 +33,7 @@ def plot_score_distribution_with_significance(data, p_values) -> None:
         plt.plot([x1, x1, x2, x2], [y, y + 1, y + 1, y], lw=1.5, color="black")
         p_text = f"p = {p:.2e}"
         plt.text((x1 + x2) / 2, y + 2, p_text, ha="center", fontsize=11, fontweight="bold")
+
     plt.ylim(-15, 70)
     plt.xlabel("Category", labelpad=10)
     plt.ylabel("PrOCTOR Score")
@@ -58,8 +71,8 @@ def plot_correlation(predict_result_toxic, predict_result_benign) -> None:
     plt.grid(True)
     plt.show()
 
-def SuspectedAdverseDrugEvents_count_for_eachdrug(prediction_combine) -> None:
-    num_categories = len(prediction_combine.columns[3:])
+def SuspectedAdverseDrugEvents_count_for_eachdrug(prediction_combine, adverse_drug_reactions) -> None:
+    num_categories = len(adverse_drug_reactions)
     color_map = cm.get_cmap("tab20b", num_categories)
     colors = [mcolors.rgb2hex(color_map(i)) for i in range(num_categories)]
 
@@ -69,7 +82,7 @@ def SuspectedAdverseDrugEvents_count_for_eachdrug(prediction_combine) -> None:
     x_indexes = np.arange(len(prediction_combine["Drugs"])) * (1 + gap_between_drugs)
 
     plt.figure(figsize=(30, 10))
-    for i, (column, color) in enumerate(zip(prediction_combine.columns[3:], colors)):
+    for i, (column, color) in enumerate(zip(prediction_combine[adverse_drug_reactions], colors)):
         plt.bar(x_indexes + i * bar_width, prediction_combine[column], width=bar_width,
                 label=column, color=color)
 
@@ -123,8 +136,8 @@ def SuspectedAdverseDrugEvents_count(pre_benign, pre_toxic, list_of_adverse_reac
     print(f"\nOut of {len(list_of_adverse_reaction)} categories, {toxic_higher_count} ({percent_toxic_higher:.1f}%) have higher counts in predicted toxic drugs")
     
     width = 0.4
-    base_color_benign = "#ff7f00"
-    base_color_toxic = "#984ea3"
+    base_color_benign = "#8ecae6"
+    base_color_toxic = "#fb8500"
     alphas = [0.6,0.8]
     offset = 0.2
 
