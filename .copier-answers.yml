@@ -15,7 +15,8 @@ SelectGitHubActions:
 - AddGitHubActionBuild_flag
 SelectPublishReleaseFeatures: []
 _commit: 260b245
-_src_path: /home/wschuell/Boulot_Projets/Templates/copier_templates/python-template
+_src_path: git+https://github.com/wschuell/python-template
+# _src_path: git+file:///home/wschuell/Boulot_Projets/Templates/copier_templates/python-template
 copyright_holder: Huanni Zhang
 email: huanni.zhang@univie.ac.at
 full_name: Huanni Zhang
