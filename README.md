@@ -16,7 +16,7 @@
 
 ## Data
 
-You can download the data, including training_and_test_data, precalculated_data_for_trialblazer_model and precomputed_data_for_reproduction_with_notebooks, from: https://doi.org/10.5281/zenodo.15783346
+You can download the data, including training_and_test_data, precalculated_data_for_trialblazer_model and precomputed_data_for_reproduction_with_notebooks, from: https://doi.org/10.5281/zenodo.17311675
 
 To download the data automatically, see below the description of the Command Line Interface.
 

@@ -65,7 +65,7 @@ class Trialblazer:
         remove_MultiComponent_cpd: bool = True,
         # features: None | list[str] = None,
         morgan_n_bits: int = 2048,
-        model_url: str | None = "https://zenodo.org/records/15783346/files/precalculated_data_for_trialblazer_model.tar.gz",
+        model_url: str | None = "https://zenodo.org/records/17311675/files/precalculated_data_for_trialblazer_model.tar.gz",
         archive_type:str="tar.gz",
         top_folder:bool=True,
     ) -> None:
