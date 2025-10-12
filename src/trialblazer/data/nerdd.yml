@@ -1,0 +1,144 @@
+module:
+  rank: 9
+  name: trialblazer
+  visible_name: Trialblazer
+  visible: False
+  logo: !image logo.svg
+  logo_caption: Toxicity risk prediction in late-stage drug development
+  example_smiles: CCOC(=O)N1CCN(CC1)C2=C(C(=O)C2=O)N3CCN(CC3)C4=CC=C(C=C4)OC
+  batch_size: 100
+
+  title: Predicting Toxicity Risks in Late-Stage Drug Development
+  description: |
+    Trialblazer is a machine learning classifier based on multilayer perceptrons (MLPs) for the
+    prediction of compounds with a potentially increased risk of late-stage toxicity, i.e. failures
+    during clinical studies or market withdrawal due to toxicity reasons. The model is trained on a
+    dataset compiled from public sources, comprising 1,610 benign drugs and 246 drug candidates that
+    failed or were withdrawn due to toxicity. Trialblazer's predictions serve as an indicator tool
+    to flag compounds with an increased potential risk of toxicity early in the development
+    pipeline.
+
+  partners:
+    - name: University of Vienna
+      logo: !image logo_vienna.gif
+      url: https://www.univie.ac.at/en
+
+  publications:
+    - title: |
+        The name of the publication
+      authors:
+        - first_name: Huanni
+          last_name: Zhang
+        - first_name: Matthias
+          last_name: Welsch
+        - first_name: William
+          last_name: Schueller
+        - first_name: Johannes
+          last_name: Kirchmair
+          email: johannes.kirchmair@univie.ac.at
+      journal: ChemRxiv
+      year: 2025
+      doi: 10.26434/chemrxiv-2025-8jfc3
+
+  about: |
+    ## About Trialblazer
+    ... add documentation here
+
+  result_properties:
+    - name: prediction
+      visible_name: Prediction
+      type: str
+      sortable: True
+      choices:
+        - value: benign
+          label: Benign
+        - value: toxic
+          label: Toxic
+      color_palette:
+        range:
+          - positive
+          - negative
+
+    - name: pred_prob_positive
+      visible_name: Probability (toxic)
+      visible: True
+      type: float
+      sortable: True
+      color_palette:
+        type: sequential
+        domain:
+          - 0
+          - 1
+        range:
+          - neutral
+          - negative
+
+    - name: pred_prob_negative
+      visible_name: Probability (benign)
+      visible: False
+      type: float
+      sortable: True
+      color_palette:
+        type: sequential
+        domain:
+          - 0
+          - 1
+        range:
+          - neutral
+          - positive
+
+    - name: PrOCTOR_score
+      visible_name: PrOCTOR score
+      visible: True
+      type: float
+      sortable: True
+      # no idea what range and colors makes sense here
+      # Note: everything above max value will be colored the same
+      # (same goes for min value)
+      color_palette:
+        type: sequential
+        domain:
+          - 0
+          - 5
+        range:
+          - neutral
+          - positive
+
+    - name: 3_nearest_neighbor_score
+      visible_name: 3-Nearest Neighbor Score
+      visible: True
+      type: float
+      sortable: True
+      color_palette:
+        type: sequential
+        domain:
+          - 0
+          - 1
+        range:
+          - neutral
+          - positive
+
+    - name: closest_distance_to_training
+      visible_name: Mol. sim. to training set
+      visible: True
+      type: float
+      sortable: True
+      color_palette:
+        type: sequential
+        domain:
+          - 0
+          - 1
+        range:
+          - neutral
+          - positive
+
+    - name: closest_training_mol
+      visible_name: Closest training molecule
+      visible: True
+      type: mol
+
+    - name: closest_training_smiles
+      visible_name: Closest training SMILES
+      visible: False
+      type: representation
+      from_property: closest_training_mol
