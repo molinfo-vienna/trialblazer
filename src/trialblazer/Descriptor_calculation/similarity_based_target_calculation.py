@@ -2,9 +2,6 @@ import numpy as np
 import pandas as pd
 from FPSim2 import FPSim2Engine
 from rdkit import Chem
-import warnings
-warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
-
 
 def target_features_preprocess(
     chembl_data,

@@ -23,12 +23,6 @@ from sklearn.model_selection import StratifiedKFold
 from sklearn.neural_network import MLPClassifier
 from tqdm import tqdm
 
-from rdkit import RDLogger
-import warnings
-
-RDLogger.DisableLog('rdApp.*')
-warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
-warnings.filterwarnings('ignore')
 
 def get_morgan2(mol):
     return list(AllChem.GetMorganFingerprintAsBitVect(mol,2,nBits=2048))
