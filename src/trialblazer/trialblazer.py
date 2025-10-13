@@ -44,13 +44,6 @@ from .Descriptor_calculation.process_target_features import (
 from .models import trialblazer_func
 from .models import trialblazer_train
 
-from rdkit import RDLogger
-import warnings
-
-RDLogger.DisableLog('rdApp.*')
-warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
-logger = logging.getLogger(__name__).addHandler(logging.NullHandler())
-
 
 class Trialblazer:
     """Wrapper to load the model, the input smiles, set the different parameters and the methods, and then store the results."""
