@@ -463,11 +463,11 @@ def trialblazer_func(
     test_set_aligned["id"] = test_set["id"]
     test_set_aligned["SmilesForDropDu"] = test_set["SmilesForDropDu"]
     test_set_aligned["prediction"] = y_pred_opt
-    test_set_aligned["pred_prob_positive"] = y_prob[:, 1]
-    test_set_aligned["pred_prob_negative"] = y_prob[:, 0]
+    test_set_aligned["pred_prob_toxic"] = y_prob[:, 1]
+    test_set_aligned["pred_prob_benign"] = y_prob[:, 0]
 
     # PrOCTOR score
-    odd = test_set_aligned.pred_prob_negative / test_set_aligned.pred_prob_positive
+    odd = test_set_aligned.pred_prob_benign / test_set_aligned.pred_prob_toxic
     PrOCTOR_score = np.log2(odd)
     test_set_aligned["PrOCTOR_score"] = PrOCTOR_score.round(2)
     test_set_aligned["PrOCTOR_score"] = test_set_aligned["PrOCTOR_score"].apply(
