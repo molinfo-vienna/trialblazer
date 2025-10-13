@@ -25,7 +25,7 @@ def remove_duplicate_splitted_files(inputfolder, outputfolder, prefix) -> None:
         li.append(df)
 
     df = pd.concat(li, axis=0, ignore_index=True)
-    df = df[["preprocessedSmiles", "id", "tautomerizedSmiles"]]
+    df = df[["preprocessedSmiles", "id"]]
 
     df = df[df["preprocessedSmiles"] != ""]
 
@@ -49,7 +49,7 @@ def remove_duplicate_splitted_files(inputfolder, outputfolder, prefix) -> None:
             "preprocessedSmiles",
             "id",
             "conID",
-            "tautomerizedSmiles",
+            # "tautomerizedSmiles",
             "inchi_noStereo",
         ]
     ].to_csv(outputFile1, sep="\t", index=False)
@@ -138,7 +138,7 @@ def split_dataframe_by_groups_with_tautomerizedSmiles(
                     "preprocessedSmiles",
                     "id",
                     "conID",
-                    "tautomerizedSmiles",
+                    # "tautomerizedSmiles",
                     "inchi_noStereo",
                 ]
             ].to_csv(outputFile3, sep="\t", index=False)
@@ -152,7 +152,7 @@ def split_dataframe_by_groups_with_tautomerizedSmiles(
             "preprocessedSmiles",
             "id",
             "conID",
-            "tautomerizedSmiles",
+            # "tautomerizedSmiles",
             "inchi_noStereo",
         ]
     ].to_csv(outputFile3, sep="\t", index=False)
