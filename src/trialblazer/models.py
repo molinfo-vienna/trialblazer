@@ -182,11 +182,10 @@ def MLP_cv(X, y, opt_num_feature="all", threshold=None) -> None:
 
     disp = ConfusionMatrixDisplay(
         confusion_matrix=mean_cms,
-        display_labels=classifier.classes_
+        display_labels=['benign', 'toxic']
     )
     disp.plot(
-        cmap=plt.cm.Blues,
-        xticks_rotation="vertical"
+        cmap=plt.cm.Blues
     )
 
 
