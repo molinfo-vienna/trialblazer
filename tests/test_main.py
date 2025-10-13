@@ -21,6 +21,7 @@ output_data = pd.read_csv(
 )
 
 output_data = output_data[["id", "pred_prob_toxic", "PrOCTOR_score"]]
+output_data["id"] = output_data["id"].astype(str)
 output_rm = output_data[~output_data["id"].str.contains(r"\d+x\d+")]
 
 output_data = output_data.set_index("id")
@@ -45,6 +46,7 @@ def test_run_no_remove(tmpdir):
     tb.write(output_file=os.path.join(tmpdir, "trialblazer.csv"))
     df = tb.result.copy()
     df = df[["id", "pred_prob_toxic", "PrOCTOR_score"]]
+    df["id"] = df["id"].astype(str)
     df = df.set_index("id")
     df = df.sort_index()
     assert len(df.index) == len(output_data.index)

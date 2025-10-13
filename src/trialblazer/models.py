@@ -472,6 +472,7 @@ def trialblazer_func(
         float,
     )
     if remove_MultiComponent_cpd:
+        predict_result_sim['id'] = predict_result_sim['id'].astype(str)
         predict_result_sim_remove_multi = predict_result_sim[
             ~predict_result_sim["id"].str.contains(r"\d+x\d+")
         ]  # Remove multi-component drugs if the toxicity of the compounds is uncertain
