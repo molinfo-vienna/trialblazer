@@ -449,7 +449,6 @@ def trialblazer_func(
     X_columns = features
     test_set_aligned = test_set.reindex(columns=X_columns, fill_value=0)
     X_test_ANO = selector.transform(test_set_aligned)
-
     y_prob = classifier.predict_proba(X_test_ANO)
     y_pred_opt = (y_prob[:, 1] >= threshold).astype(int)
 
@@ -469,7 +468,6 @@ def trialblazer_func(
     predict_result_sim = test_set_aligned[
         ["id", "SmilesForDropDu", "prediction", "pred_prob_toxic", "pred_prob_benign", "PrOCTOR_score"]
     ].copy()
-
     predict_result_sim["PrOCTOR_score"] = predict_result_sim["PrOCTOR_score"].astype(
         float,
     )
