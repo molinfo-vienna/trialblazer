@@ -22,10 +22,10 @@ def get_data_from_DB(moleculeCsv, reformatedFile, smiles_col="SMILES", id_col=No
     )
     if id_col is not None:
         ID = moleculeCsv[id_col]
-    elif "chembl_id" in moleculeCsv:
-        ID = moleculeCsv["chembl_id"]
+    elif "your_id" in moleculeCsv:
+        ID = moleculeCsv["your_id"]
     else:
-        moleculeCsv["chembl_id"] = None
+        moleculeCsv["your_id"] = None
         ID = moleculeCsv["hash_id"]
     smilesDict = dict(zip(smiles, ID))
     with open(reformatedFile, "w", encoding="utf-8") as f:

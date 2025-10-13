@@ -45,7 +45,7 @@ trialblazer-download --url=<MODEL-URL> --model-folder=<FOLDER>
 
 #### Running the algorithm
 
-The input data should be a CSV file with headers and a column named "SMILES". If present, the column "chembl_id" will also be used for the output.
+The input data should be a CSV file with headers and a column named "SMILES". If present, the column "your_id" will also be used for the output.
 
 The command `trialblazer --help` outputs:
 
@@ -129,5 +129,5 @@ This package was created with [Copier](https://github.com/copier-org/copier) and
 ## Citation
 
 ```
-Zhang, H., Welsch, M., Schueller, W., & Kirchmair, J. (2025). Trialblazer: A Chemistry-Focused Predictor of Toxicity Risks in Late-Stage Drug Development [Data set]. Zenodo. https://doi.org/10.5281/zenodo.15783346
+Zhang, H., Welsch, M., Schueller, W., & Kirchmair, J. (2025). Trialblazer: A Chemistry-Focused Predictor of Toxicity Risks in Late-Stage Drug Development [Data set]. Zenodo. https://doi.org/10.5281/zenodo.17311675
 ```

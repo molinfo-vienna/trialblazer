@@ -15,13 +15,13 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
 # copy package files first (for caching docker layers)
-COPY requirements.txt ./
+COPY nerdd-requirements.txt ./
 
 # create environment
 # -p /env forces the environment to be created in /env so we don't have to know the env name
 RUN micromamba create --copy -p /env -c conda-forge python=3.12 rdkit=2025.09.1 && \
     # install the pip dependencies
-    micromamba run -p /env pip install -r requirements.txt
+    micromamba run -p /env pip install -r nerdd-requirements.txt
 
 # copy the rest of the source code directory and install the main package
 COPY . .
