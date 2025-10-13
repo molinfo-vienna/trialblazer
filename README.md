@@ -45,7 +45,7 @@ trialblazer-download --url=<MODEL-URL> --model-folder=<FOLDER>
 
 #### Running the algorithm
 
-The input data should be a CSV file with headers and a column named "SMILES". If present, the column "chembl_id" will also be used for the output.
+The input data should be a CSV file with headers and a column named "SMILES". If present, the column "your_id" will also be used for the output.
 
 The command `trialblazer --help` outputs:
 
