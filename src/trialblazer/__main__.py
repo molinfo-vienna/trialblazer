@@ -13,7 +13,7 @@ def main(input_file, output_file, model_folder) -> None:
 
 
 @click.command()
-@click.option("--url", help="Archive Model URL", type=str, required=False,default="https://zenodo.org/records/15783346/files/precalculated_data_for_trialblazer_model.tar.gz")
+@click.option("--url", help="Archive Model URL", type=str, required=False,default="https://zenodo.org/records/17311675/files/precalculated_data_for_trialblazer_model.tar.gz")
 @click.option("--archive_type", help="Archive Type", type=str, required=False, default="tar.gz")
 @click.option("--top_folder", help="Whether the archive has a top folder", type=str, required=False, default=True)
 @click.option("--model_folder", help="Model Folder", default=None, type=str)
