@@ -4,7 +4,7 @@
 FROM mambaorg/micromamba:2.0.5 AS build
 
 # necessary to display the image on Github
-LABEL org.opencontainers.image.source="https://github.com/shirte/trialblazer"
+LABEL org.opencontainers.image.source="https://github.com/molinfo-vienna/trialblazer"
 
 # using the root user during the build stage
 USER root
@@ -19,7 +19,7 @@ COPY nerdd-requirements.txt ./
 
 # create environment
 # -p /env forces the environment to be created in /env so we don't have to know the env name
-RUN micromamba create --copy -p /env -c conda-forge python=3.12 rdkit=2025.09.1 && \
+RUN micromamba create --copy -p /env -c conda-forge python=3.12 rdkit=2024.9.6 && \
     # install the pip dependencies
     micromamba run -p /env pip install -r nerdd-requirements.txt
 
