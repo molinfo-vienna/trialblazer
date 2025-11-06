@@ -13,7 +13,7 @@ module:
     Trialblazer is a machine learning classifier based on multilayer perceptrons (MLPs) for the
     prediction of compounds with a potentially increased risk of late-stage toxicity leading to
     failures during clinical studies or market withdrawal due to toxicity reasons. The model is
-    trained on a dataset compiled from public sources, comprising  1,603 benign drugs and 238 drug
+    trained on a dataset compiled from public sources, comprising  1603 benign drugs and 238 drug
     candidates that failed or were withdrawn due to toxicity. The model does not require prior
     knowledge of the compound's specific biological target(s), making it particularly useful for
     profiling innovative compounds for which such information is typically unavailable.
@@ -36,9 +36,9 @@ module:
         - first_name: Johannes
           last_name: Kirchmair
           email: johannes.kirchmair@univie.ac.at
-      journal: ChemRxiv
+      journal: European Journal of Medicinal Chemistry
       year: 2025
-      doi: 10.26434/chemrxiv-2025-8jfc3
+      doi: https://doi.org/10.1016/j.ejmech.2025.118306
 
   about: |
     ## About Trailblazer
@@ -96,7 +96,7 @@ module:
     To assess the reliability of individual predictions, Trialblazer provides two complementary
     similarity indicators.
 
-    * **Minimum similarity to the training set:** Quantifies the structural similarity between the
+    * **Maximum similarity to the training set:** Quantifies the structural similarity between the
     compound of interest and its closest neighbor in the training set. The similarity is measured
     using the Tanimoto Coefficient (TC) derived from Morgan fingerprints (radius = 2, length = 2048
     bits).
